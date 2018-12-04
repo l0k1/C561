@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<PropertyList>
+
+  <path>asi.ac</path>
+
+  <animation>
+    <object-name>fond</object-name>
+    <object-name>face</object-name>
+    <object-name>needle</object-name>
+
+    <object-name>vitre</object-name>
+  </animation>
+
+  <animation>
+    <type>shader</type>
+    <shader>chrome</shader>
+    <texture>Aircraft/Generic/Effects/glass_shader.png</texture>
+    <object-name>vitre</object-name>
+  </animation>
+
+  <!-- working for Rembrandt -->
+  <effect>
+    <inherits-from>Effects/model-transparent</inherits-from>
+    <condition>
+      <property>sim/rendering/rembrandt/enabled</property>
+    </condition>
+    <object-name>vitre</object-name>
+  </effect>
+
+  <animation>
+    <type>material</type>
+    <object-name>face</object-name>
+    <object-name>needle</object-name>
+    <condition>
+      <property>/controls/lighting/instrument-lights</property>
+    </condition>
+    <emission>
+      <red>   0.80 </red>
+      <green> 0.50 </green>
+      <blue>  0.50 </blue>
+    </emission>
+  </animation>
+
+  <animation>
+    <type>rotate</type>
+    <object-name>needle</object-name>
+    <property>instrumentation/airspeed-indicator/indicated-speed-kt</property>
+    <interpolation>
+      <entry><ind>       0 </ind><dep>   3 </dep></entry> <!--   0 km/h -->
+      <entry><ind>      18 </ind><dep>  23 </dep></entry> <!--  80 km/h -->
+      <entry><ind>      18 </ind><dep>  34 </dep></entry> <!-- 100 km/h -->
+      <entry><ind>      30 </ind><dep>  48 </dep></entry> <!-- 120 km/h -->
+      <entry><ind>   43.20 </ind><dep>  66 </dep></entry> <!-- 140 km/h -->
+      <entry><ind>   54.00 </ind><dep>  87 </dep></entry> <!-- 160 km/h -->
+      <entry><ind>   64.79 </ind><dep> 111 </dep></entry> <!-- 180 km/h -->
+      <entry><ind>   75.59 </ind><dep> 137 </dep></entry> <!-- 200 km/h -->
+      <entry><ind>   86.39 </ind><dep> 167 </dep></entry> <!-- 220 km/h -->
+      <entry><ind>   97.19 </ind><dep> 198 </dep></entry> <!-- 240 km/h -->
+      <entry><ind>  107.99 </ind><dep> 230 </dep></entry> <!-- 260 km/h -->
+      <entry><ind>  118.79 </ind><dep> 269 </dep></entry> <!-- 280 km/h -->
+      <entry><ind>  129.59 </ind><dep> 307 </dep></entry> <!-- 300 km/h -->
+      <entry><ind>  140.39 </ind><dep> 349 </dep></entry> <!-- 320 km/h -->
+      <entry><ind>  151.19 </ind><dep> 390 </dep></entry> <!-- 340 km/h -->
+      <entry><ind>  161.99 </ind><dep> 430 </dep></entry> <!-- 360 km/h -->
+      <entry><ind>  172.79 </ind><dep> 470 </dep></entry> <!-- 380 km/h -->
+      <entry><ind>  183.59 </ind><dep> 524 </dep></entry> <!-- 400 km/h -->
+      <entry><ind>  194.38 </ind><dep> 568 </dep></entry> <!-- 420 km/h -->
+      <entry><ind>  205.18 </ind><dep> 615 </dep></entry> <!-- 440 km/h -->
+      <entry><ind>  215.98 </ind><dep> 667 </dep></entry> <!-- 460 km/h -->
+    </interpolation>
+    <axis>
+      <x> -1 </x>
+      <y>  0 </y>
+      <z>  0 </z>
+    </axis>
+  </animation>
+
+</PropertyList>
+

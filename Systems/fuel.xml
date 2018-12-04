@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+
+
+<system name="fuel">
+
+
+
+	<channel name="Fuel System">
+
+		<!--
+		the flow rates are probably all wrong
+		also, no boost pumps/fuel pumps/shutoff switches are implemented beyond the absolute bare minimum.
+		currently, this is accurate, but basic.
+		-->
+
+		<!-- Flow levelling between 0 and 1 -->
+
+		<switch name="trash/propulsion/tank[0]/flow-to-accumulator">
+			<default value="0"/>
+			<test logic="AND" value="-1">
+				propulsion/tank[0]/contents-lbs gt 0.1
+				propulsion/tank[3]/contents-lbs lt 0.5
+				/sim/model/fuelselector == 0
+			</test>
+			<output>propulsion/tank[0]/flow-to-accumulator</output>
+		</switch>
+
+		<switch name="trash/propulsion/tank[1]/flow-to-accumulator">
+			<default value="0"/>
+			<test logic="AND" value="-1">
+				propulsion/tank[1]/contents-lbs gt 0.1
+				propulsion/tank[3]/contents-lbs lt 0.5
+				/sim/model/fuelselector == 1
+			</test>
+			<output>propulsion/tank[1]/flow-to-accumulator</output>
+		</switch>
+
+		<switch name="trash/propulsion/tank[2]/flow-to-accumulator">
+			<default value="0"/>
+			<test logic="AND" value="-1">
+				propulsion/tank[2]/contents-lbs gt 0.1
+				propulsion/tank[3]/contents-lbs lt 0.5
+				/sim/model/fuelselector == 2
+			</test>
+			<output>propulsion/tank[2]/flow-to-accumulator</output>
+		</switch>
+
+
+
+		<!-- inputs/outputs -->
+
+		<!-- tank 0 -->
+
+		<summer name="trash/fuelrefuel1">
+			<input>propulsion/tank[0]/flow-to-accumulator</input>
+			<output>propulsion/tank[0]/external-flow-rate-pps</output>
+		</summer>
+
+		<!-- tank 1 -->
+
+		<summer name="trash/fuelrefuel2">
+			<input>propulsion/tank[1]/flow-to-accumulator</input>
+			<output>propulsion/tank[1]/external-flow-rate-pps</output>
+		</summer>
+
+		<!-- tank2 2 -->
+
+		<summer name="trash/fuelrefuel3">
+			<input>propulsion/tank[2]/flow-to-accumulator</input>
+			<output>propulsion/tank[2]/external-flow-rate-pps</output>
+		</summer>
+
+		<!-- tank 3 accumulator -->
+		<summer name="trash/fuelaccumulator2">
+			<input>-propulsion/tank[0]/flow-to-accumulator</input>
+			<input>-propulsion/tank[1]/flow-to-accumulator</input>
+			<input>-propulsion/tank[2]/flow-to-accumulator</input>
+			<output>propulsion/tank[3]/external-flow-rate-pps</output>
+		</summer>
+
+	</channel>
+</system>

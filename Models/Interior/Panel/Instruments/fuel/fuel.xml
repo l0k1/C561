@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<PropertyList>
+
+  <path>fuel.ac</path>
+
+  <animation>
+    <object-name>fond</object-name>
+    <object-name>face</object-name>
+    <object-name>needle0</object-name>
+    <object-name>needle1</object-name>
+    <object-name>needle2</object-name>
+
+    <object-name>vitre</object-name>
+  </animation>
+
+  <animation>
+    <type>noshadow</type>
+    <object-name>vitre</object-name>
+  </animation>
+
+  <animation>
+    <type>shader</type>
+    <shader>chrome</shader>
+    <texture>Aircraft/Generic/Effects/glass_shader.png</texture>
+    <object-name>vitre</object-name>
+  </animation>
+
+  <!-- working for Rembrandt -->
+  <effect>
+    <inherits-from>Effects/model-transparent</inherits-from>
+    <condition>
+      <property>sim/rendering/rembrandt/enabled</property>
+    </condition>
+    <object-name>vitre</object-name>
+  </effect>
+
+  <animation>
+    <type>material</type>
+    <object-name>face</object-name>
+    <object-name>needle0</object-name>
+    <object-name>needle1</object-name>
+    <object-name>needle2</object-name>
+    <condition>
+      <property>/controls/lighting/instrument-lights</property>
+    </condition>
+    <emission>
+      <red>   0.80 </red>
+      <green> 0.50 </green>
+      <blue>  0.50 </blue>
+    </emission>
+  </animation>
+
+  <animation>
+    <type>select</type>
+    <object-name>needle0</object-name>
+    <condition>
+      <equals>
+        <property>sim/model/fuelselector</property>
+        <value> 0 </value> 
+      </equals>
+    </condition>
+  </animation>
+
+  <animation>
+    <type>select</type>
+    <object-name>needle1</object-name>
+    <condition>
+      <equals>
+        <property>sim/model/fuelselector</property>
+        <value> 1 </value> 
+      </equals>
+    </condition>
+  </animation>
+
+  <animation>
+    <type>select</type>
+    <object-name>needle2</object-name>
+    <condition>
+      <equals>
+        <property>sim/model/fuelselector</property>
+        <value> 2 </value> 
+      </equals>
+    </condition>
+  </animation>
+
+  <!-- 210 lbs -->
+  <animation>
+    <type>rotate</type>
+    <object-name>needle0</object-name>
+    <property>consumables/fuel/tank[0]/level-gal_us</property>
+    <interpolation> 
+      <entry><ind>  0.0 </ind><dep>   0 </dep></entry>
+      <entry><ind> 20.8 </ind><dep> 245 </dep></entry>
+    </interpolation>
+    <axis> 
+      <x> -1 </x>
+      <y>  0 </y>
+      <z>  0 </z>
+    </axis>
+  </animation>
+    
+  <!-- 150 lbs -->
+  <animation>
+    <type>rotate</type>
+    <object-name>needle1</object-name>
+    <property>consumables/fuel/tank[1]/level-gal_us</property>
+    <interpolation> 
+      <entry><ind>  0.0 </ind><dep>   0 </dep></entry>
+      <entry><ind> 18.6 </ind><dep> 245 </dep></entry>
+    </interpolation>
+    <axis> 
+      <x> -1 </x>
+      <y>  0 </y>
+      <z>  0 </z>
+    </axis>
+  </animation>
+ 
+  <!-- 210 lbs -->
+  <animation>
+    <type>rotate</type>
+    <object-name>needle2</object-name>
+    <property>consumables/fuel/tank[2]/level-gal_us</property>
+    <interpolation> 
+      <entry><ind>  0.0 </ind><dep>   0 </dep></entry>
+      <entry><ind> 20.8 </ind><dep> 245 </dep></entry>
+    </interpolation>
+    <axis>
+      <x> -1 </x>
+      <y>  0 </y>
+      <z>  0 </z>
+    </axis>
+  </animation>
+ 
+</PropertyList>
+

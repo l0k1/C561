@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<PropertyList>
+
+  <path>interior.ac</path>
+
+  <animation>
+    <!-- Objets opaques -->
+    <object-name>interieur</object-name>
+    <object-name>tour</object-name>
+
+    <!-- Objets transparents -->
+    <object-name>intvitres</object-name>
+  </animation>
+
+  <animation>
+    <type>noshadow</type>
+    <object-name>intvitres</object-name>
+  </animation>
+
+  <!-- Pilote -->
+  <model>
+    <path>Aircraft/C561/Models/Pilot/pilot.xml</path>
+    <offsets>
+      <x-m>  0.214 </x-m>
+      <y-m>  0.000 </y-m>
+      <z-m>  0.012 </z-m>
+    </offsets>
+  </model>
+
+  <!-- Planches de bord -->
+  <model> 
+    <path>Aircraft/C561/Models/Interior/Panel/panel.xml</path>
+    <offsets>
+      <x-m> -0.495 </x-m>
+      <y-m>  0.000 </y-m>
+      <z-m>  0.169 </z-m>
+    </offsets>
+  </model> -->
+
+  <!-- Canopy
+  <animation>
+    <type>translate</type>
+    <object-name>intverriere</object-name>
+    <property>instrumentation/doors/crew/position-norm</property>
+    <factor> 0.75 </factor>
+    <axis>
+      <x> 1.000 </x>
+      <y> 0.000 </y>
+      <z> 0.000 </z>
+    </axis>
+  </animation> -->
+
+</PropertyList>
+

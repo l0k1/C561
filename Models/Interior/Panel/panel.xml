@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<PropertyList>
+
+  <path>panel.ac</path>
+
+  <animation>
+    <!-- Objets opaques -->
+    <object-name>panel</object-name>
+
+    <!-- Objets transparents -->
+  </animation>
+
+  <!-- AI -->
+  <model>
+    <path>Aircraft/C561/Models/Interior/Panel/Instruments/ai/ai.xml</path>
+    <offsets>
+      <x-m>  0.467461 </x-m>
+      <y-m>  0.000000 </y-m>
+      <z-m>  0.07445 </z-m>
+    </offsets>
+  </model>
+
+  <!-- ASI -->
+  <model>
+    <path>Aircraft/C561/Models/Interior/Panel/Instruments/asi/asi.xml</path>
+    <offsets>
+      <x-m>  0.468261 </x-m>
+      <y-m> -0.091709 </y-m>
+      <z-m>  0.074462 </z-m>
+    </offsets>
+  </model>
+
+  <!-- TACH -->
+  <model>
+    <path>Aircraft/C561/Models/Interior/Panel/Instruments/tach/tach.xml</path>
+    <offsets>
+      <x-m> 0.468428 </x-m>
+      <y-m>-0.254989 </y-m>
+      <z-m>-0.008406 </z-m>
+    </offsets>
+  </model>
+
+  <!-- VSI -->
+  <model>
+    <path>Aircraft/C561/Models/Interior/Panel/Instruments/vsi/vsi.xml</path>
+    <offsets>
+      <x-m>  0.468595 </x-m>
+      <y-m>  0.100045 </y-m>
+      <z-m> -0.018844 </z-m>
+    </offsets>
+  </model>
+
+  <!-- TURN -->
+  <model>
+    <path>Aircraft/C561/Models/Interior/Panel/Instruments/turn/turn.xml</path>
+    <offsets>
+      <x-m>  0.465679 </x-m>
+      <y-m> -0.093126 </y-m>
+      <z-m> -0.02328 </z-m>
+    </offsets>
+  </model>
+
+  <!-- ALT -->
+  <model>
+    <path>Aircraft/C561/Models/Interior/Panel/Instruments/alt/alt.xml</path>
+    <offsets>
+      <x-m>  0.468304 </x-m>
+      <y-m>  0.100594 </y-m>
+      <z-m>  0.076905 </z-m>
+    </offsets>
+  </model>
+
+  <!-- CLOCK -->
+  <model>
+    <path>Aircraft/C561/Models/Interior/Panel/Instruments/clock/clock.xml</path>
+    <offsets>
+      <x-m>  0.468817 </x-m>
+      <y-m>  0.267158 </y-m>
+      <z-m> -0.087414 </z-m>
+    </offsets>
+  </model>
+
+  <!-- MAN -->
+  <model>
+    <path>Aircraft/C561/Models/Interior/Panel/Instruments/man/man.xml</path>
+    <offsets>
+      <x-m>  0.466166 </x-m>
+      <y-m>  0.196967 </y-m>
+      <z-m> -0.016641 </z-m>
+    </offsets>
+  </model>
+
+  <!-- FUELSELECTOR -->
+  <model>
+    <path>Aircraft/C561/Models/Interior/Panel/Instruments/fuelselector/fuelselector.xml</path>
+    <offsets>
+      <x-m> 0.465363 </x-m>
+      <y-m> 0.197036 </y-m>
+      <z-m> 0.053579 </z-m>
+    </offsets>
+  </model>
+
+  <!-- FUEL -->
+  <model>
+    <path>Aircraft/C561/Models/Interior/Panel/Instruments/fuel/fuel.xml</path>
+    <offsets>
+      <x-m>  0.465737 </x-m>
+      <y-m>  0.267616 </y-m>
+      <z-m>  0.052655 </z-m>
+    </offsets>
+  </model>
+
+  <!-- SWITCH -->
+  <model>
+    <path>Aircraft/C561/Models/Interior/Panel/Instruments/Switch/switch.xml</path>
+    <offsets>
+      <x-m>  0.466065 </x-m>
+      <y-m> -0.021755 </y-m>
+      <z-m>  0.239983 </z-m>
+    </offsets>
+  </model>
+
+  <model>
+    <path>Aircraft/C561/Models/Interior/Panel/Instruments/KFS-564A/kfs564a.xml</path>
+    <offsets>
+      <x-m>  0.459803 </x-m>
+      <y-m> -0.140755 </y-m>
+      <z-m>  0.142421 </z-m>
+    </offsets>
+  </model>
+
+  <model>
+    <path>Aircraft/C561/Models/Interior/Panel/Instruments/ki206/ki206.xml</path>
+    <offsets>
+      <x-m>  0.465233 </x-m>
+      <y-m> -0.185335 </y-m>
+      <z-m>  0.06754 </z-m>
+    </offsets>
+  </model>
+
+  <model>
+    <path>Aircraft/C561/Models/Interior/Panel/Instruments/mfd/mfd.xml</path>
+    <offsets>
+      <x-m>  0.475278 </x-m>
+      <y-m>  0.000000 </y-m>
+      <z-m>  0.231191 </z-m>
+    </offsets>
+  </model>
+
+  <model>
+    <path>Aircraft/C561/Models/Interior/Panel/Instruments/stec-55x/stec-55x.xml</path>
+    <offsets>
+      <x-m>  0.468000 </x-m>
+      <y-m>  0.000000 </y-m>
+      <z-m>  0.361200 </z-m>
+    </offsets>
+  </model>
+
+    <model>
+    <path>Aircraft/C561/Models/Interior/Panel/Instruments/hi/hi.xml</path>
+    <offsets>
+      <x-m>  0.475315 </x-m>
+      <y-m>  0.000000 </y-m>
+      <z-m> -0.025036 </z-m>
+    </offsets>
+  </model>
+
+</PropertyList>

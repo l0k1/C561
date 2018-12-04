@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="ISO-8859-1"?> 
+
+<PropertyList>
+
+  <path>switch.ac</path>
+
+  <animation>
+    <type>material</type>
+    <object-name>base</object-name>
+    <object-name>base.001</object-name>
+    <object-name>base.002</object-name>
+    <object-name>base.003</object-name>
+    <object-name>base.004</object-name>
+    <object-name>info</object-name>
+    <emission>
+      <red>   0.50 </red>
+      <green> 0.25 </green>
+      <blue>  0.25 </blue>
+      <factor-prop>/controls/lighting/instrument-lights</factor-prop>
+    </emission>
+  </animation>
+
+  <animation>
+    <type>pick</type>
+    <object-name>nav_light</object-name>
+    <action>
+      <button>0</button>
+      <repeatable>false</repeatable>
+      <binding>
+        <command>property-toggle</command>
+        <property>controls/lighting/nav-lights</property>
+      </binding>
+      <binding>
+        <command>property-toggle</command>
+        <property>sim/sound/switch</property>
+      </binding>
+    </action>
+  </animation>
+
+  <animation>
+    <type>rotate</type>
+    <object-name>nav_light</object-name>
+    <property>/controls/lighting/nav-lights</property>
+    <factor> 40 </factor>
+    <offset-deg> -40 </offset-deg>
+    <axis>
+      <x>  0 </x>
+      <y> -1 </y>
+      <z>  0 </z>
+    </axis>
+    <center>
+      <x-m>  0.000140 </x-m>
+      <y-m>  0.000000 </y-m>
+      <z-m> -0.026947 </z-m>
+    </center>
+  </animation>
+
+  <animation>
+    <type>pick</type>
+    <object-name>bat</object-name>
+    <action>
+      <button>0</button>
+      <repeatable>false</repeatable>
+      <binding>
+        <command>property-toggle</command>
+        <property>controls/electric/battery-switch</property>
+      </binding>
+      <binding>
+        <command>property-toggle</command>
+        <property>sim/sound/switch</property>
+      </binding>
+    </action>
+  </animation>
+
+  <animation>
+    <type>rotate</type>
+    <object-name>bat</object-name>
+    <property>/controls/electric/battery-switch</property>
+    <factor> 40 </factor>
+    <offset-deg> -40 </offset-deg>
+    <axis>
+      <x>  0 </x>
+      <y> -1 </y>
+      <z>  0 </z>
+    </axis>
+    <center>
+      <x-m> -0.001865 </x-m>
+      <y-m>  0.000000 </y-m>
+      <z-m>  0.016589 </z-m>
+    </center>
+  </animation>
+
+  <animation>
+    <type>pick</type>
+    <object-name>inst_light</object-name>
+    <action>
+      <button>0</button>
+      <repeatable>false</repeatable>
+      <binding>
+        <command>property-toggle</command>
+        <property>controls/lighting/instrument-lights</property>
+      </binding>
+      <binding>
+        <command>property-toggle</command>
+        <property>sim/sound/switch</property>
+      </binding>
+    </action>
+  </animation>
+
+  <animation>
+    <type>rotate</type>
+    <object-name>inst_light</object-name>
+    <property>/controls/lighting/instrument-lights</property>
+    <factor> 40 </factor>
+    <offset-deg> -40 </offset-deg>
+    <axis>
+      <x>  0 </x>
+      <y> -1 </y>
+      <z>  0 </z>
+    </axis>
+    <center>
+      <x-m> -0.000481 </x-m>
+      <y-m>  0.000000 </y-m>
+      <z-m> -0.004533 </z-m>
+    </center>
+  </animation>
+
+  <animation>
+    <type>pick</type>
+    <object-name>ap_mast</object-name>
+    <action>
+      <button>0</button>
+      <repeatable>false</repeatable>
+      <binding>
+        <command>property-toggle</command>
+        <property>/it-stec55x/input/ap-master-sw</property>
+      </binding>
+      <binding>
+        <command>property-toggle</command>
+        <property>sim/sound/switch</property>
+      </binding>
+    </action>
+  </animation>
+
+  <animation>
+    <type>rotate</type>
+    <object-name>ap_mast</object-name>
+    <property>/it-stec55x/input/ap-master-sw</property>
+    <factor> 40 </factor>
+    <offset-deg> -40 </offset-deg>
+    <axis>
+      <x>  0 </x>
+      <y> -1 </y>
+      <z>  0 </z>
+    </axis>
+    <center>
+      <x-m> -0.001865 </x-m>
+      <y-m>  0.000000 </y-m>
+      <z-m>  0.016589 </z-m>
+    </center>
+  </animation>
+
+  <animation>
+    <type>pick</type>
+    <object-name>et_mast</object-name>
+    <action>
+      <button>0</button>
+      <repeatable>false</repeatable>
+      <binding>
+        <command>property-toggle</command>
+        <property>/it-stec55x/input/electric-trim-sw</property>
+      </binding>
+      <binding>
+        <command>property-toggle</command>
+        <property>sim/sound/switch</property>
+      </binding>
+    </action>
+  </animation>
+
+  <animation>
+    <type>rotate</type>
+    <object-name>et_mast</object-name>
+    <property>/it-stec55x/input/electric-trim-sw</property>
+    <factor> 40 </factor>
+    <offset-deg> -40 </offset-deg>
+    <axis>
+      <x>  0 </x>
+      <y> -1 </y>
+      <z>  0 </z>
+    </axis>
+    <center>
+      <x-m> -0.001865 </x-m>
+      <y-m>  0.000000 </y-m>
+      <z-m> -0.004048 </z-m>
+    </center>
+  </animation>
+
+</PropertyList>

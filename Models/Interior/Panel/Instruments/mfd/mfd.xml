@@ -5,6 +5,39 @@
   <path>mfd.ac</path>
 
   <animation>
+    <type>material</type>
+    <object-name>button01</object-name>
+    <object-name>button02</object-name>
+    <object-name>button03</object-name>
+    <object-name>button04</object-name>
+    <object-name>button05</object-name>
+    <object-name>button06</object-name>
+    <object-name>button07</object-name>
+    <object-name>button08</object-name>
+    <object-name>button09</object-name>
+    <object-name>button10</object-name>
+    <object-name>button11</object-name>
+    <object-name>button12</object-name>
+    <object-name>button13</object-name>
+    <object-name>button14</object-name>
+    <object-name>button15</object-name>
+    <object-name>button16</object-name>
+    <object-name>button17</object-name>
+    <object-name>button18</object-name>
+    <object-name>button19</object-name>
+    <object-name>button20</object-name>
+    <object-name>bigleft</object-name>
+    <object-name>bigright</object-name>
+    <object-name>mfdscreen</object-name>
+    <emission>
+      <red>   0.30 </red>
+      <green> 0.25 </green>
+      <blue>  0.25 </blue>
+      <factor-prop>/controls/lighting/instrument-lights</factor-prop>
+    </emission>
+  </animation>
+
+  <animation>
     <type>pick</type>
     <object-name>button01</object-name>
     <action>

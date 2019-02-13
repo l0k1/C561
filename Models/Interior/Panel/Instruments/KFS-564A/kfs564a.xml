@@ -5,6 +5,18 @@
   <path>kfs564a.ac</path>
 
   <animation>
+    <type>material</type>
+    <object-name>kfs564aLCD</object-name>
+    <emission>
+      <red>   0.45 </red>
+      <green> 0.25 </green>
+      <blue>  0.25 </blue>
+      <factor-prop>/controls/lighting/instrument-lights</factor-prop>
+    </emission>
+  </animation>
+
+
+  <animation>
         <type>knob</type>
         <object-name>kfs564aVolKnob</object-name>
         <property>/instrumentation/nav/volume</property>

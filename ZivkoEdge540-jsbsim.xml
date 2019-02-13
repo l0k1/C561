@@ -192,7 +192,7 @@
      </location>
      <density unit="LBS/GAL"> 6.02 </density> <!-- Avgas -->
      <capacity unit="LBS">125.0</capacity>
-     <contents unit="LBS">2.0</contents>
+     <contents unit="LBS">66.0</contents>
   </tank>
 
   <!-- fuselage 71ltr-->
@@ -204,7 +204,7 @@
      </location>
      <density unit="LBS/GAL"> 6.02 </density> <!-- Avgas -->
      <capacity unit="LBS">112.0</capacity>
-     <contents unit="LBS">112.0</contents>
+     <contents unit="LBS">66.0</contents>
   </tank>
 
   <!-- right wing 79ltr-->
@@ -216,7 +216,7 @@
      </location>
      <density unit="LBS/GAL"> 6.02 </density> <!-- Avgas -->
      <capacity unit="LBS">125.0</capacity>
-     <contents unit="LBS">2.0</contents>
+     <contents unit="LBS">66.0</contents>
   </tank>
 
   <!-- feed tank-->
@@ -578,6 +578,7 @@
                3.14  0.05
             </tableData>
           </table>
+          <value>0.95</value>
       </product>
     </function>
 <!--
@@ -752,7 +753,7 @@
           <property>metrics/Sw-sqft</property>
           <property>metrics/bw-ft</property>
           <property>fcs/left-aileron-pos-rad</property>
-          <value>0.15</value>
+          <value>0.10</value>
           <property>aero/function/cos-alpha</property>
        </product>
     </function>
@@ -790,7 +791,7 @@
           <property>metrics/Sw-sqft</property>
           <property>metrics/cbarw-ft</property>
           <property>fcs/elevator-pos-rad</property>
-          <value>-0.55</value>
+          <value>-0.10</value>
        </product>
     </function>
 

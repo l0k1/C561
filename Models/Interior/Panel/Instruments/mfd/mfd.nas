@@ -2,6 +2,7 @@
 
 # properties
 var master_power_prop = props.globals.getNode("controls/electric/battery-switch"); # bool
+var speed_prop = props.globals.getNode("velocities/airspeed-kt");
 var pitch_prop = props.globals.getNode("orientation/pitch-deg");
 var heading_prop = props.globals.getNode("orientation/heading-deg");
 var roll_prop = props.globals.getNode("orientation/roll-deg");
@@ -164,6 +165,11 @@ var MFD_DISPLAY = {
         # for status screen
         m.status_texts = nil;
 
+        # for the fuel screen
+        m.fuel_group = nil;
+
+        m.vsi_group = nil;
+
         # for map screen
         m.airports = [];
         m.map_airport_layer = m.mfd.createGroup("airports");
@@ -183,12 +189,13 @@ var MFD_DISPLAY = {
                 .line(-19,-19)
                 .move(19,-33)
                 .line(-19,19)
+                .hide()
         };
 
         # for SAR screen
         m.sar_max_dist = 50000; # meters
         m.sar_min_dist = 0;
-        m.max_update_time = 0.0025;
+        m.max_update_time = 0.0075;
         m.sar_tests_per_loop = 40;
         m.sar_index_x = 0;
         m.sar_index_y = 0;
@@ -247,22 +254,29 @@ var MFD_DISPLAY = {
         #print("screen status init");
         reset_button_array();
         button_array[0] = button_sar;
+        button_array[1] = button_fuel;
+        button_array[2] = button_vsi;
         me.update_labels();
         if (me.status_texts == nil) {
             me.status_texts = me.mfd.createGroup();
-            #idk what to really show here
-            me.status_datum = [];
-            append(me.status_datum,
-                {
-                    display: "SPEED: ",
-                    prop: props.globals.getNode("velocities/airspeed-kt"),
-                    child: me.status_texts.createChild("text", "lbl16")
-                            .setTranslation(30, 30)
-                            .setAlignment("left-center")
-                            .setFont("LiberationFonts/LiberationMono-Regular.ttf")
-                            .setFontSize(26, 1.0)
-                            .setColor(1,1,1)
-                });
+            me.status_texts.createChild("text", "speed")
+                .setTranslation(100, 100)
+                .setAlignment("left-center")
+                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                .setFontSize(26, 1.0)
+                .setColor(1,1,1);
+            me.status_texts.createChild("text", "altitude")
+                .setTranslation(100, 130)
+                .setAlignment("left-center")
+                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                .setFontSize(26, 1.0)
+                .setColor(1,1,1);
+            me.status_texts.createChild("text", "heading")
+                .setTranslation(100, 160)
+                .setAlignment("left-center")
+                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                .setFontSize(26, 1.0)
+                .setColor(1,1,1);
 
         }
         me.status_texts.show();
@@ -276,9 +290,9 @@ var MFD_DISPLAY = {
     },
     screen_status: func() {
         #print("screen status");
-        foreach(var nd; me.status_datum){
-            nd.child.setText(nd.display ~ nd.prop.getValue());
-        }
+        me.status_texts.getElementById("speed").setText(sprintf("Speed..........%i kts",props.globals.getNode("velocities/airspeed-kt").getValue()));
+        me.status_texts.getElementById("altitude").setText(sprintf("Altitude.......%i ft",props.globals.getNode("position/altitude-ft").getValue()));
+        me.status_texts.getElementById("heading").setText(sprintf("Heading........%i",props.globals.getNode("orientation/heading-magnetic-deg").getValue()));
     },
 
     # TERRAIN RADAR IMAGING
@@ -316,7 +330,7 @@ var MFD_DISPLAY = {
             for (i = 0; i < me.sar_res_x; i = i + 1) {
                 append(me.sar_pixel_array,[]);
                 for(j = 0; j < me.sar_res_y; j = j + 1) {
-                    print(i~j);
+                    #print(i~j);
                     append(me.sar_pixel_array[i],
                         {
                             normval: 0,
@@ -415,14 +429,18 @@ var MFD_DISPLAY = {
             me.sar_labels.getElementById("sar_center_marker_black").setTranslation(512,510);
         }
         me.sar_labels.show();
-        me.sar_pixels.show();
+        for (i = 0; i < size(me.sar_pixel_path_array); i = i + 1) {
+            me.sar_pixel_path_array[i].show();
+        }
     },
 
     screen_sar_rem: func() {
         #print('hiding pixels?');
         if (me.sar_pixels != nil) {
             #print('hiding pixels.');
-            me.sar_pixels.hide();
+            for (i = 0; i < size(me.sar_pixel_path_array); i = i + 1) {
+                me.sar_pixel_path_array[i].hide();
+            }
             me.sar_labels.hide();
         }
     },
@@ -433,13 +451,13 @@ var MFD_DISPLAY = {
         me.sar_labels.getElementById("sar_vert_slew_display").setText("SLWΛ: " ~ me.sar_slew_vert);
         me.sar_labels.getElementById("sar_zoom_display").setText("ZOOM: x" ~ me.sar_zoom);
         me.sar_labels.getElementById("sar_gain_display").setText("GAIN: " ~ me.sar_gain);
-        me.sar_labels.getElementById("sar_loop_display").setText("# Loops: " ~ me.sar_loops);
+        #me.sar_labels.getElementById("sar_loop_display").setText("# Loops: " ~ me.sar_loops);
 
-        if (me.pause_draw == 0) {
-            me.sar_labels.getElementById("sar_pause_display").setText("** PAUSED **");
-        } else {
-            me.sar_labels.getElementById("sar_pause_display").setText("");
-        }
+        #if (me.pause_draw == 0) {
+        #    me.sar_labels.getElementById("sar_pause_display").setText("** PAUSED **");
+        #} else {
+        #    me.sar_labels.getElementById("sar_pause_display").setText("");
+        #}
 
         #print('screensar');
         me.ang_px_x = me.sar_fov_x / me.sar_res_x;
@@ -452,6 +470,9 @@ var MFD_DISPLAY = {
         #me.screen_sar_get_spread();
 
         if (me.sar_index_x == 0 and me.sar_index_y == 0) {
+            print('rsetting');
+            me.sar_pitch = pitch_prop.getValue();
+            me.sar_heading = heading_prop.getValue();
             me.sar_geo.set_latlon(geo.aircraft_position().lat(), geo.aircraft_position().lon(), geo.aircraft_position().alt());
         }
 
@@ -461,14 +482,21 @@ var MFD_DISPLAY = {
         me.start_time = systime();
         me.sar_loops = 0;
         while (systime() - me.start_time < me.max_update_time) { 
-            me.sar_loops = me.sar_loops + 1;
             if (me.pause_draw == 0) {return;}
+            me.sar_loops = me.sar_loops + 1;
+            if (me.sar_index_x == 0 and me.sar_index_y == 0) {
+                #print('rsetting');
+                me.sar_pitch = pitch_prop.getValue();
+                me.sar_heading = heading_prop.getValue();
+                me.sar_geo.set_latlon(geo.aircraft_position().lat(), geo.aircraft_position().lon(), geo.aircraft_position().alt());
+            }
         #for (var i = 0; i < me.sar_tests_per_loop; i = i + 1) {
             #heading = (my_heading + sar_bearing) - (sar_fov_x / 2) + (sar_index_x * ang_px_x)
             #pitch   = (my_pitch + sar_pitch)     - (sar_fov_y / 2) + (sar_index_y * ang_px_y)
-            me.heading = (heading_prop.getValue() + me.sar_slew_horiz) - me.fov_x + (me.sar_index_x * me.ang_px_x);
-            me.pitch = (pitch_prop.getValue() + me.sar_slew_vert) + me.fov_y - (me.sar_index_y * me.ang_px_y);
-            me.testPos = geo.aircraft_position().apply_course_distance(me.heading, me.sar_max_dist);
+            me.heading = (me.sar_heading + me.sar_slew_horiz) - me.fov_x + (me.sar_index_x * me.ang_px_x);
+            me.pitch = (me.sar_pitch + me.sar_slew_vert) + me.fov_y - (me.sar_index_y * me.ang_px_y);
+            me.testPos.set_latlon(me.sar_geo.lat(), me.sar_geo.lon(), me.sar_geo.alt()); #just setting testPos to sar_geo took too long.
+            me.testPos.apply_course_distance(me.heading, me.sar_max_dist);
             me.testPos.set_alt((math.tan(me.pitch * D2R) * me.sar_max_dist) + me.sar_geo.alt());
             #if( me.sar_index_x == 0 and me.sar_index_y == 0) {
             #    print("mypos: " ~ me.myPos.alt());
@@ -518,11 +546,9 @@ var MFD_DISPLAY = {
                 me.sar_index_x = me.sar_index_x + 2;
             }
         }
-        print("we did " ~ me.sar_loops ~ " loops.");
+        #print("we did " ~ me.sar_loops ~ " loops.");
     },
 
-                                                                        #(i * me.sar_pixel_x_size) + me.sar_border_size,
-                                                                        #(j * me.sar_pixel_y_size) + me.sar_border_size,
     screen_sar_inc_dist: func() {
         if (me.sar_max_dist < 100000) {
             me.sar_max_dist = me.sar_max_dist + 10000; # meters
@@ -588,9 +614,292 @@ var MFD_DISPLAY = {
         return;
     },
 
+    screen_fuel_init: func() {
+        reset_button_array();
+        button_array[0] = button_status;
+        me.update_labels();
+        # we need a simple diagram for the plane
+        # we need lines connecting the tanks to an "Engine"
+        # the active lines will be green
+        # each tank will have text displaying fuel quantity
+
+        # below, have stats such as 
+        # - current fuel burn rate
+        # - remaining distance on that fuel tank
+        # - total remaining distance (estimated + rounded)
+        # - active tank
+        # - combined fuel amount
+        if (me.fuel_group == nil) {
+
+            me.fuel_tank_left_prop = props.globals.getNode("/consumables/fuel/tank[0]/level-gal_us");
+            me.fuel_tank_center_prop = props.globals.getNode("/consumables/fuel/tank[1]/level-gal_us");
+            me.fuel_tank_right_prop = props.globals.getNode("/consumables/fuel/tank[2]/level-gal_us");
+            me.fuel_consumption_prop = props.globals.getNode("/engines/engine/fuel-flow-gph");
+            me.fuel_selector_prop = props.globals.getNode("/sim/model/fuelselector");
+            me.fuel_total_prop = props.globals.getNode("consumables/fuel/total-fuel-gal_us");
+
+            me.fuel_group = me.mfd.createGroup();
+            me.fuel_group.createChild("path","silhouette")
+                .move(92,-352)
+                .line(-184,0)
+                .line(0,125)
+                .line(-310,0)
+                .line(0,195)
+                .line(305,0)
+                .line(97,320)
+                .line(97,-320)
+                .line(305,0)
+                .line(0,-195)
+                .line(-310,0)
+                .line(0,-125)
+                .setStrokeLineWidth(2)
+                .setStrokeLineJoin("bevel")
+                .setColor(1,1,1)
+                .setTranslation(512,512);
+                
+            me.fuel_group.createChild("path","fuelboxes")
+                .rect(150,350,160,60)
+                .rect(714,350,160,60)
+                .rect(432,455,160,60)
+                .rect(440,180,144,70)
+                .setStrokeLineWidth(2)
+                .setStrokeLineJoin("bevel")
+                .setColor(1,1,1);
+                
+            me.fuel_group.createChild("path","fuellineleft")
+                .moveTo(310,380)
+                .lineTo(512,380)
+                .setStrokeLineWidth(4)
+                .setStrokeLineJoin("bevel")
+                .setColor(1,1,1);
+                
+            me.fuel_group.createChild("path","fuellineright")
+                .moveTo(714,380)
+                .lineTo(512,380)
+                .setStrokeLineWidth(4)
+                .setStrokeLineJoin("bevel")
+                .setColor(1,1,1);
+                
+            me.fuel_group.createChild("path","fuellinecenter")
+                .moveTo(512,455)
+                .lineTo(512,380)
+                .setStrokeLineWidth(4)
+                .setStrokeLineJoin("bevel")
+                .setColor(1,1,1);
+                
+            me.fuel_group.createChild("path","fuellinefeed")
+                .moveTo(512,250)
+                .lineTo(512,380)
+                .setStrokeLineWidth(4)
+                .setStrokeLineJoin("bevel")
+                .setColor(1,1,1);
+
+                
+            me.fuel_group.createChild("text","fuelinfoleft")
+                .setAlignment("center-left")
+                .setFontSize(50)
+                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                .setColor(1,1,1)
+                .setTranslation(155,400);
+                
+            me.fuel_group.createChild("text","fuelinforight")
+                .setAlignment("center-left")
+                .setFontSize(50)
+                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                .setColor(1,1,1)
+                .setTranslation(719,400);
+                
+            me.fuel_group.createChild("text","fuelinfocenter")
+                .setAlignment("center-left")
+                .setFontSize(50)
+                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                .setColor(1,1,1)
+                .setTranslation(437,500);
+                
+            me.fuel_group.createChild("text","fuelinfoengine")
+                .setAlignment("center-left")
+                .setFontSize(45)
+                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                .setColor(1,1,1)
+                .setTranslation(445,235);
+
+            me.fuel_group.createChild("text","total_fuel")
+                .setAlignment("center-left")
+                .setFontSize(26)
+                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                .setColor(1,1,1)
+                .setTranslation(100,830);
+            me.fuel_group.createChild("text","total_time_remaining")
+                .setAlignment("center-left")
+                .setFontSize(26)
+                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                .setColor(1,1,1)
+                .setTranslation(100,850);
+            me.fuel_group.createChild("text","total_distance_remaining")
+                .setAlignment("center-left")
+                .setFontSize(26)
+                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                .setColor(1,1,1)
+                .setTranslation(100,870);
+            me.fuel_group.createChild("text","tank_time_remaining")
+                .setAlignment("center-left")
+                .setFontSize(26)
+                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                .setColor(1,1,1)
+                .setTranslation(100,890);
+            me.fuel_group.createChild("text","tank_distance_remaining")
+                .setAlignment("center-left")
+                .setFontSize(26)
+                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                .setColor(1,1,1)
+                .setTranslation(100,910);
+
+        }
+
+        me.fuel_group.getElementById("fuelinfoleft").setText(sprintf("%05.2f",me.fuel_tank_left_prop.getValue()));
+        me.fuel_group.getElementById("fuelinforight").setText(sprintf("%05.2f",me.fuel_tank_right_prop.getValue()));
+        me.fuel_group.getElementById("fuelinfocenter").setText(sprintf("%05.2f",me.fuel_tank_center_prop.getValue()));
+        me.fuel_group.getElementById("fuelinfoengine").setText(sprintf("%05.2f",me.fuel_consumption_prop.getValue()));
+        me.old_select = -1;
+        me.line_feed_color = 0;
+
+        me.fuel_group.show();
+    },
+
+    screen_fuel_rem: func() {
+        if (me.fuel_group != nil) {
+            me.fuel_group.hide();
+        }
+    },
+
+    screen_fuel: func() {
+
+        if (me.fuel_selector_prop.getValue() == 0) {
+            me._fuelprop = me.fuel_tank_left_prop;
+        } elsif (me.fuel_selector_prop.getValue() == 1) {
+            me._fuelprop = me.fuel_tank_center_prop;
+        } else {
+            me._fuelprop = me.fuel_tank_right_prop;
+        }
+        me.fuel_group.getElementById("fuelinfoleft").setText(sprintf("%05.2f",me.fuel_tank_left_prop.getValue()));
+        me.fuel_group.getElementById("fuelinfocenter").setText(sprintf("%05.2f",me.fuel_tank_center_prop.getValue()));
+        me.fuel_group.getElementById("fuelinforight").setText(sprintf("%05.2f",me.fuel_tank_right_prop.getValue()));
+        me.fuel_group.getElementById("fuelinfoengine").setText(sprintf("%05.2f",me.fuel_consumption_prop.getValue()));
+
+        if (me.old_select != me.fuel_selector_prop.getValue()) {
+            if (me.fuel_selector_prop.getValue() == 0) {
+                me.fuel_group.getElementById("fuellineleft").setColor(0,1,0);
+                me.fuel_group.getElementById("fuellinecenter").setColor(1,1,1);
+                me.fuel_group.getElementById("fuellineright").setColor(1,1,1);
+
+            } elsif (me.fuel_selector_prop.getValue() == 1) {
+                me.fuel_group.getElementById("fuellineleft").setColor(1,1,1);
+                me.fuel_group.getElementById("fuellinecenter").setColor(0,1,0);
+                me.fuel_group.getElementById("fuellineright").setColor(1,1,1);
+            } else {
+                me.fuel_group.getElementById("fuellineleft").setColor(1,1,1);
+                me.fuel_group.getElementById("fuellinecenter").setColor(1,1,1);
+                me.fuel_group.getElementById("fuellineright").setColor(0,1,0);
+            }
+        }
+
+        if (me.line_feed_color == 0 and me.fuel_consumption_prop.getValue() > 0) {
+            me.fuel_group.getElementById("fuellinefeed").setColor(0,1,0);
+            me.line_feed_color = 1;
+        } elsif (me.line_feed_color == 1 and me.fuel_consumption_prop.getValue() <= 0) {
+            me.line_feed_color = 0;
+            me.fuel_group.getElementById("fuellinefeed").setColor(1,1,1);
+        }
+
+        # time remaining = total fuel / fuel flow 
+        # distance remaining = speed * time
+
+        me.fuel_group.getElementById("total_fuel").setText(sprintf("Total fuel..........%05.1f gals",me.fuel_total_prop.getValue()));
+        if (me.fuel_consumption_prop.getValue() != 0) {
+            me._tr = me.fuel_total_prop.getValue() / me.fuel_consumption_prop.getValue();
+        } else {
+            me._tr = 9999;
+        }
+        me.fuel_group.getElementById("total_time_remaining").setText(sprintf("Time remaining......%05.1f hours",me._tr));
+        me.fuel_group.getElementById("total_distance_remaining").setText(sprintf("Dist remaining......%05.1f NM",speed_prop.getValue() * me._tr));
+        if (me.fuel_consumption_prop.getValue() != 0) {
+            me._tr = me._fuelprop.getValue() / me.fuel_consumption_prop.getValue();
+        } else {
+            me._tr = 9999;
+        }
+        me.fuel_group.getElementById("tank_time_remaining").setText(sprintf("Time left in tank...%05.1f hours",me._tr));
+        me.fuel_group.getElementById("tank_distance_remaining").setText(sprintf("Dist left in tank...%05.1f NM",speed_prop.getValue() * me._tr));
+
+
+        me.old_select = me.fuel_selector_prop.getValue();
+    },
+
+    screen_vsi_init: func() {
+        reset_button_array();
+        button_array[0] = button_status;
+        me.update_labels();
+        # need:
+        # horizon indicator
+        # altitude tape
+        # speed tape
+        # v/s tape?
+        # maybe another compass?
+        if (me.vsi_group == nil) {
+
+            me.vsi_group = me.mfd.createGroup();
+            me.vsi_group.createChild("path","outlines")
+                .moveTo(130,180)
+                .lineTo(130,580)
+                .lineTo(230,580)
+                .lineTo(230,180)
+                .lineTo(130,180)
+                .moveTo(1024 - 130,180)
+                .lineTo(1024 - 130,580)
+                .lineTo(1024 - 230,580)
+                .lineTo(1024 - 230,180)
+                .lineTo(1024 - 130,180)
+                .setStrokeLineWidth(4)
+                .setStrokeLineJoin("bevel")
+                .setColor(1,1,1);
+
+            me.speedbars = [];
+            for(var i = 1; i <= 5; i = i + 1){
+                append(me.speedbars,
+                    {
+                        major: 1,
+                        path: me.vsi_group.createChild("path","speedbar" ~ i)
+                                .line(-50,0)
+                    }
+                );
+            }
+            for(var i = 1; i < 30; i = i + 1){
+                append(me.speedbars,
+                    {
+                        major: 0,
+                        path: me.vsi_group.createChild("path","speedbarminor" ~ i)
+                                .line(-30,0)
+                    }
+                );                                                                                                                                                            
+            }
+
+        }
+        me.vsi_group.show();
+
+    },
+
+    screen_vsi_rem: func() {
+        if (me.vsi_group != nil) {
+            me.vsi_group.hide();
+        }
+    },
+
+    screen_vsi: func() {
+
+    },
+
     screen_map_init: func() {
 
-    }
+    },
 
 };
 
@@ -654,7 +963,9 @@ var button_arch = {
 var button_null   = {parents:[button_arch]};
 var button_test   = {parents:[button_arch], label: "TEST", main_func: mfd_ref.screen_testfunc};
 var button_status = {parents:[button_arch], label: "STAT", main_func: mfd_ref.screen_status, init_func: mfd_ref.screen_status_init, end_func: mfd_ref.screen_status_rem};
-var button_sar    = {parents:[button_arch], label: "TSAR", main_func: mfd_ref.screen_sar,    init_func: mfd_ref.screen_sar_init,    end_func: mfd_ref.screen_sar_rem};
+var button_sar    = {parents:[button_arch], label: "TSAR", main_func: mfd_ref.screen_sar,    init_func: mfd_ref.screen_sar_init,    end_func: mfd_ref.screen_sar_rem   };
+var button_fuel   = {parents:[button_arch], label: "FUEL", main_func: mfd_ref.screen_fuel,   init_func: mfd_ref.screen_fuel_init,   end_func: mfd_ref.screen_fuel_rem  };
+var button_vsi    = {parents:[button_arch], label: "VSI ", main_func: mfd_ref.screen_vsi,    init_func: mfd_ref.screen_vsi_init,    end_func: mfd_ref.screen_vsi_rem   };
     var button_sar_dist_dec   = {parents:[button_arch], label:"DISV", main_func: mfd_ref.screen_sar_dec_dist,    temp: 1};
     var button_sar_dist_inc   = {parents:[button_arch], label:"DISΛ", main_func: mfd_ref.screen_sar_inc_dist,    temp: 1};
     var button_sar_slew_left  = {parents:[button_arch], label:"SLW<", main_func: mfd_ref.screen_sar_slew_left,   temp: 1};

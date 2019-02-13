@@ -96,7 +96,8 @@
 
     <property-base>sim/model/livery</property-base>
     <texture-prop>texture</texture-prop>
-    <texture>texture.png</texture>
+    <texture>Aircraft/C561/Models/Liveries/texture.png</texture>
+
     <specular>
       <red-prop>specular/red</red-prop>
       <green-prop>specular/green</green-prop>

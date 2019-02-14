@@ -19,7 +19,7 @@ Reference TCDS 1E4
   <minmp unit="INHG">10.0</minmp>
   <maxmp unit="INHG">28.0</maxmp>
   <displacement unit="IN3">540</displacement>
-  <maxhp>340.00</maxhp>
+  <maxhp>450.00</maxhp>
   <cycles>4.0</cycles>
   <idlerpm>700.0</idlerpm>
   <maxrpm>2700.0</maxrpm>

@@ -849,36 +849,54 @@ var MFD_DISPLAY = {
             me.upper_limit = 180;
             me.lower_limit = 580;
             me.edge_dist = 130;
-            me.far_edge_dist = 230;
+            me.far_edge_dist = 250;
             
             me.speed_tape_visible = 60; #how many knots to show at one time
 
             me.vsi_group = me.mfd.createGroup();
             me.vsi_group.createChild("path","outlines")
-                .moveTo(edge_dist,me.upper_limit)
-                .lineTo(edge_dist,me.lower_limit)
-                .lineTo(far_edge_dist,me.lower_limit)
-                .lineTo(far_edge_dist,me.upper_limit)
-                .lineTo(edge_dist,me.upper_limit)
-                .moveTo(1024 - edge_dist,me.upper_limit)
-                .lineTo(1024 - edge_dist,me.lower_limit)
-                .lineTo(1024 - far_edge_dist,me.lower_limit)
-                .lineTo(1024 - far_edge_dist,me.upper_limit)
-                .lineTo(1024 - edge_dist,me.upper_limit)
+                .moveTo(me.edge_dist,me.upper_limit)
+                .lineTo(me.edge_dist,me.lower_limit)
+                .lineTo(me.far_edge_dist,me.lower_limit)
+                .lineTo(me.far_edge_dist,me.upper_limit)
+                .lineTo(me.edge_dist,me.upper_limit)
+                .moveTo(1024 - me.edge_dist,me.upper_limit)
+                .lineTo(1024 - me.edge_dist,me.lower_limit)
+                .lineTo(1024 - me.far_edge_dist,me.lower_limit)
+                .lineTo(1024 - me.far_edge_dist,me.upper_limit)
+                .lineTo(1024 - me.edge_dist,me.upper_limit)
                 .setStrokeLineWidth(4)
                 .setStrokeLineJoin("bevel")
                 .setColor(1,1,1);
 
             # speedbar stuff
             me.speed_tape_pixel_per_knot = (me.lower_limit - me.upper_limit) / me.speed_tape_visible;
+            me.vert_center = ((me.lower_limit-me.upper_limit)/2)+me.upper_limit;
+            me.speed_tape_text = [];
             me.speedbars_major = [];
             me.speedbars_minor = [];
-            for(var i = 1; i <= math.ciel(me.speed_tape_visible/10); i = i + 1){
-                append(me.speedbars_major, me.vsi_group.createChild("path","speedbar" ~ i).line(-50,0));
+            for(var i = 1; i <= math.ceil(me.speed_tape_visible/10); i = i + 1){
+                append(me.speedbars_major, me.vsi_group.createChild("path","speedbar" ~ i)
+                                            .line(-50,0)
+                                            .setStrokeLineWidth(4)
+                                            .setColor(1,1,1));
+                append(me.speed_tape_text, me.vsi_group.createChild("text","tape_read" ~ i)
+                                            .setAlignment("right-center")
+                                            .setFontSize(30)
+                                            .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                            .setColor(1,1,1));
             }
-            for(var i = 1; i < 4 * math.ciel(me.speed_tape_visible/10); i = i + 1){
-                append(me.speedbars_minor, me.vsi_group.createChild("path","speedbarminor" ~ i).line(-30,0));                                                                                                                                                            
+            for(var i = 1; i <= 4 * math.ceil(me.speed_tape_visible/10); i = i + 1){
+                append(me.speedbars_minor, me.vsi_group.createChild("path","speedbarminor" ~ i)
+                                            .line(-30,0)
+                                            .setStrokeLineWidth(2)
+                                            .setColor(1,1,1));                                                                                                                                                            
             }
+            me.vsi_group.createChild("path","speedmarker")
+                .moveTo(1024 - me.edge_dist,me.vert_center)
+                .lineTo(1024 - me.far_edge_dist,me.vert_center)
+                .setStrokeLineWidth(4)
+                .setColor(0.2,1.0,0.2);
 
         }
         me.vsi_group.show();
@@ -893,15 +911,16 @@ var MFD_DISPLAY = {
 
     screen_vsi: func() {
         # speedbar update
+        #  print('running');
         var speed = getprop("velocities/airspeed-kt");
 
         # determine distance to bottom bar
         if (speed < 30) {
-            var c_line = me.lower_limit - (math.mod(speed,2) * me.pixel_per_knot);
+            var c_line = me.vert_center + (speed * me.speed_tape_pixel_per_knot);
         } else {
-            var c_line = me.lower_limit - ((30 - speed) * me.pixel_per_knot);
+            var c_line = (me.lower_limit - me.speed_tape_pixel_per_knot * 2) + (math.mod(speed,2) * me.speed_tape_pixel_per_knot);
         }
-        
+ 
         # determine speed setting of the bottom bar
         if (speed < 30) {
             var c_speed = 0;
@@ -913,15 +932,25 @@ var MFD_DISPLAY = {
         var i_maj = 0;
         var i_min = 0;
         for (var i = 1; i <= 30; i = i + 1) {
+            if (c_line < me.upper_limit) {
+                break;
+            }
             if (math.mod(c_speed,10) == 0) {
                 # use a major
-                me.speedbars_major[i_maj].moveTo(1024 - 130,c_line).show()
+                me.speedbars_major[i_maj].setTranslation(1024 - me.edge_dist,c_line);
+                if (c_line > me.upper_limit + 20 and c_line < me.lower_limit - 20) {
+                    me.speed_tape_text[i_maj].setTranslation(1024 - me.edge_dist - 55,c_line).setText(c_speed).show();
+                } else {
+                    me.speed_tape_text[i_maj].hide();
+                }
                 i_maj = i_maj + 1;
             } else {
-                me.speedbars_minor[i_min].moveTo(1024 - 130,c_line).show()
+                me.speedbars_minor[i_min].setTranslation(1024 - me.edge_dist,c_line);
+                i_min = i_min + 1;
             }
             c_speed = c_speed + 2;
-            c_line = c_line - (pixel_per_knot * 2);
+            #print('c_line: ' ~ c_line);
+            c_line = c_line - (me.speed_tape_pixel_per_knot * 2);
         }
         
     },

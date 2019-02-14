@@ -845,41 +845,39 @@ var MFD_DISPLAY = {
         # v/s tape?
         # maybe another compass?
         if (me.vsi_group == nil) {
+            
+            me.upper_limit = 180;
+            me.lower_limit = 580;
+            me.edge_dist = 130;
+            me.far_edge_dist = 230;
+            
+            me.speed_tape_visible = 60; #how many knots to show at one time
 
             me.vsi_group = me.mfd.createGroup();
             me.vsi_group.createChild("path","outlines")
-                .moveTo(130,180)
-                .lineTo(130,580)
-                .lineTo(230,580)
-                .lineTo(230,180)
-                .lineTo(130,180)
-                .moveTo(1024 - 130,180)
-                .lineTo(1024 - 130,580)
-                .lineTo(1024 - 230,580)
-                .lineTo(1024 - 230,180)
-                .lineTo(1024 - 130,180)
+                .moveTo(edge_dist,me.upper_limit)
+                .lineTo(edge_dist,me.lower_limit)
+                .lineTo(far_edge_dist,me.lower_limit)
+                .lineTo(far_edge_dist,me.upper_limit)
+                .lineTo(edge_dist,me.upper_limit)
+                .moveTo(1024 - edge_dist,me.upper_limit)
+                .lineTo(1024 - edge_dist,me.lower_limit)
+                .lineTo(1024 - far_edge_dist,me.lower_limit)
+                .lineTo(1024 - far_edge_dist,me.upper_limit)
+                .lineTo(1024 - edge_dist,me.upper_limit)
                 .setStrokeLineWidth(4)
                 .setStrokeLineJoin("bevel")
                 .setColor(1,1,1);
 
-            me.speedbars = [];
-            for(var i = 1; i <= 5; i = i + 1){
-                append(me.speedbars,
-                    {
-                        major: 1,
-                        path: me.vsi_group.createChild("path","speedbar" ~ i)
-                                .line(-50,0)
-                    }
-                );
+            # speedbar stuff
+            me.speed_tape_pixel_per_knot = (me.lower_limit - me.upper_limit) / me.speed_tape_visible;
+            me.speedbars_major = [];
+            me.speedbars_minor = [];
+            for(var i = 1; i <= math.ciel(me.speed_tape_visible/10); i = i + 1){
+                append(me.speedbars_major, me.vsi_group.createChild("path","speedbar" ~ i).line(-50,0));
             }
-            for(var i = 1; i < 30; i = i + 1){
-                append(me.speedbars,
-                    {
-                        major: 0,
-                        path: me.vsi_group.createChild("path","speedbarminor" ~ i)
-                                .line(-30,0)
-                    }
-                );                                                                                                                                                            
+            for(var i = 1; i < 4 * math.ciel(me.speed_tape_visible/10); i = i + 1){
+                append(me.speedbars_minor, me.vsi_group.createChild("path","speedbarminor" ~ i).line(-30,0));                                                                                                                                                            
             }
 
         }
@@ -894,7 +892,38 @@ var MFD_DISPLAY = {
     },
 
     screen_vsi: func() {
+        # speedbar update
+        var speed = getprop("velocities/airspeed-kt");
 
+        # determine distance to bottom bar
+        if (speed < 30) {
+            var c_line = me.lower_limit - (math.mod(speed,2) * me.pixel_per_knot);
+        } else {
+            var c_line = me.lower_limit - ((30 - speed) * me.pixel_per_knot);
+        }
+        
+        # determine speed setting of the bottom bar
+        if (speed < 30) {
+            var c_speed = 0;
+        } else {
+            var c_speed = (2 - math.mod((speed - 30),2)) + (speed - 30)
+        }
+        
+        # update loop
+        var i_maj = 0;
+        var i_min = 0;
+        for (var i = 1; i <= 30; i = i + 1) {
+            if (math.mod(c_speed,10) == 0) {
+                # use a major
+                me.speedbars_major[i_maj].moveTo(1024 - 130,c_line).show()
+                i_maj = i_maj + 1;
+            } else {
+                me.speedbars_minor[i_min].moveTo(1024 - 130,c_line).show()
+            }
+            c_speed = c_speed + 2;
+            c_line = c_line - (pixel_per_knot * 2);
+        }
+        
     },
 
     screen_map_init: func() {

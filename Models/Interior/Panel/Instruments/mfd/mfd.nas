@@ -850,8 +850,7 @@ var MFD_DISPLAY = {
             me.lower_limit = 580;
             me.edge_dist = 130;
             me.far_edge_dist = 250;
-            
-            me.speed_tape_visible = 60; #how many knots to show at one time
+            me.vert_center = ((me.lower_limit-me.upper_limit)/2)+me.upper_limit;
 
             me.vsi_group = me.mfd.createGroup();
             me.vsi_group.createChild("path","outlines")
@@ -870,8 +869,9 @@ var MFD_DISPLAY = {
                 .setColor(1,1,1);
 
             # speedbar stuff
+
+            me.speed_tape_visible = 60; #how many knots to show at one time
             me.speed_tape_pixel_per_knot = (me.lower_limit - me.upper_limit) / me.speed_tape_visible;
-            me.vert_center = ((me.lower_limit-me.upper_limit)/2)+me.upper_limit;
             me.speed_tape_text = [];
             me.speedbars_major = [];
             me.speedbars_minor = [];
@@ -898,6 +898,38 @@ var MFD_DISPLAY = {
                 .setStrokeLineWidth(4)
                 .setColor(0.2,1.0,0.2);
 
+            # altitude tape stuff
+            # for now, same amount of lines as the speed tape
+
+            me.altitude_tape_visible = 4000; # how many feet to show at one time
+            me.altitude_tape_pixel_per_100_feet = (me.lower_limit - me.upper_limit) / (me.altitude_tape_visible / 100);
+            me.altitude_tape_text = [];
+            me.altitudebars_major = [];
+            me.altitudebars_minor = [];
+            print(me.altitude_tape_pixel_per_100_feet);
+            for (var i = 1; i <= math.ceil(me.altitude_tape_visible/1000); i = i + 1){
+                append(me.altitudebars_major, me.vsi_group.createChild("path","altitudebar" ~ i)
+                                                .line(50,0)
+                                                .setStrokeLineWidth(4)
+                                                .setColor(1,1,1));
+                append(me.altitude_tape_text, me.vsi_group.createChild("text","alttape_read" ~ i)
+                                                .setAlignment("left-center")
+                                                .setFontSize(25)
+                                                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                                .setColor(1,1,1));
+            }
+            for(var i = 1; i <= 4 * math.ceil(me.altitude_tape_visible/1000); i = i + 1){
+                append(me.altitudebars_minor, me.vsi_group.createChild("path","altitudebarminor" ~ i)
+                                                .line(30,0)
+                                                .setStrokeLineWidth(2)
+                                                .setColor(1,1,1));
+            }
+            me.vsi_group.createChild("path","altmarker")
+                .moveTo(me.edge_dist,me.vert_center)
+                .lineTo(me.far_edge_dist,me.vert_center)
+                .setStrokeLineWidth(4)
+                .setColor(0.2,1.0,0.2);
+
         }
         me.vsi_group.show();
 
@@ -910,28 +942,28 @@ var MFD_DISPLAY = {
     },
 
     screen_vsi: func() {
-        # speedbar update
+        # speed tape update
         #  print('running');
         var speed = getprop("velocities/airspeed-kt");
 
         # determine distance to bottom bar
-        if (speed < 30) {
+        if (speed < me.speed_tape_visible / 2) {
             var c_line = me.vert_center + (speed * me.speed_tape_pixel_per_knot);
         } else {
             var c_line = (me.lower_limit - me.speed_tape_pixel_per_knot * 2) + (math.mod(speed,2) * me.speed_tape_pixel_per_knot);
         }
  
         # determine speed setting of the bottom bar
-        if (speed < 30) {
+        if (speed < me.speed_tape_visible / 2) {
             var c_speed = 0;
         } else {
-            var c_speed = (2 - math.mod((speed - 30),2)) + (speed - 30)
+            var c_speed = (2 - math.mod((speed - me.speed_tape_visible / 2),2)) + (speed - me.speed_tape_visible / 2);
         }
         
         # update loop
         var i_maj = 0;
         var i_min = 0;
-        for (var i = 1; i <= 30; i = i + 1) {
+        for (var i = 1; i <= me.speed_tape_visible / 2; i = i + 1) {
             if (c_line < me.upper_limit) {
                 break;
             }
@@ -951,6 +983,36 @@ var MFD_DISPLAY = {
             c_speed = c_speed + 2;
             #print('c_line: ' ~ c_line);
             c_line = c_line - (me.speed_tape_pixel_per_knot * 2);
+        }
+
+        # altitude tape update
+
+        var altitude = getprop("position/altitude-ft");
+
+        # determine bottom bar location
+        c_line = (me.lower_limit - me.altitude_tape_pixel_per_100_feet * 2) + (math.mod(altitude,200) * (me.altitude_tape_pixel_per_100_feet/100));
+        #var c_alt = (200 - math.mod((altitude - me.altitude_tape_visible / 200),200)) + (altitude - me.altitude_tape_visible / 200);
+        var c_alt = (altitude - (me.altitude_tape_visible/2-200)) - math.mod(altitude,200);
+        i_maj = 0;
+        i_min = 0;
+        for (var i = 1; i <= me.altitude_tape_visible / 200; i = i + 1) {
+            if (c_line < me.upper_limit) {
+                break;
+            }
+            if (math.mod(c_alt,1000) == 0) {
+                me.altitudebars_major[i_maj].setTranslation(me.edge_dist,c_line);
+                if (c_line > me.upper_limit + 20 and c_line < me.lower_limit - 20) {
+                    me.altitude_tape_text[i_maj].setTranslation(me.edge_dist + 55,c_line).setText(c_alt).show();
+                } else {
+                    me.altitude_tape_text[i_maj].hide();
+                }
+                i_maj = i_maj + 1;
+            } else {
+                me.altitudebars_minor[i_min].setTranslation(me.edge_dist,c_line);
+                i_min = i_min + 1;
+            }
+            c_alt = c_alt + 200;
+            c_line = c_line - (me.altitude_tape_pixel_per_100_feet * 2);
         }
         
     },

@@ -201,7 +201,7 @@ var MFD_DISPLAY = {
         m.sar_index_y = 0;
         m.sar_write_index_x = 0;
         m.sar_write_index_y = 0;
-        m.sar_border_size = 75; 
+        m.sar_border_size = 75;
         m.sar_fov_x = 20;
         m.sar_res_x = 40;
         m.sar_fov_y = 20;
@@ -339,7 +339,7 @@ var MFD_DISPLAY = {
                             pixel: me.sar_pixel_path_array[me.sar_pixel_path_array_index - 1].createChild("path","pixel"~i~j).rect(
                                                                                                     (i * me.sar_pixel_x_size) + me.sar_border_size,
                                                                                                     (j * me.sar_pixel_y_size) + me.sar_border_size,
-                                                                                                    me.sar_pixel_x_size, 
+                                                                                                    me.sar_pixel_x_size,
                                                                                                     me.sar_pixel_y_size)
                         });
                     if (me.sar_pixel_path_array_index >= me.sar_pixel_groups) {
@@ -481,7 +481,7 @@ var MFD_DISPLAY = {
 
         me.start_time = systime();
         me.sar_loops = 0;
-        while (systime() - me.start_time < me.max_update_time) { 
+        while (systime() - me.start_time < me.max_update_time) {
             if (me.pause_draw == 0) {return;}
             me.sar_loops = me.sar_loops + 1;
             if (me.sar_index_x == 0 and me.sar_index_y == 0) {
@@ -573,7 +573,7 @@ var MFD_DISPLAY = {
         if (me.sar_slew_vert < 30) {
             me.sar_slew_vert = me.sar_slew_vert + 1;
         }
-        
+
     },
     screen_sar_slew_down: func() {
         if (me.sar_slew_vert > -30) {
@@ -623,7 +623,7 @@ var MFD_DISPLAY = {
         # the active lines will be green
         # each tank will have text displaying fuel quantity
 
-        # below, have stats such as 
+        # below, have stats such as
         # - current fuel burn rate
         # - remaining distance on that fuel tank
         # - total remaining distance (estimated + rounded)
@@ -656,7 +656,7 @@ var MFD_DISPLAY = {
                 .setStrokeLineJoin("bevel")
                 .setColor(1,1,1)
                 .setTranslation(512,512);
-                
+
             me.fuel_group.createChild("path","fuelboxes")
                 .rect(150,350,160,60)
                 .rect(714,350,160,60)
@@ -665,28 +665,28 @@ var MFD_DISPLAY = {
                 .setStrokeLineWidth(2)
                 .setStrokeLineJoin("bevel")
                 .setColor(1,1,1);
-                
+
             me.fuel_group.createChild("path","fuellineleft")
                 .moveTo(310,380)
                 .lineTo(512,380)
                 .setStrokeLineWidth(4)
                 .setStrokeLineJoin("bevel")
                 .setColor(1,1,1);
-                
+
             me.fuel_group.createChild("path","fuellineright")
                 .moveTo(714,380)
                 .lineTo(512,380)
                 .setStrokeLineWidth(4)
                 .setStrokeLineJoin("bevel")
                 .setColor(1,1,1);
-                
+
             me.fuel_group.createChild("path","fuellinecenter")
                 .moveTo(512,455)
                 .lineTo(512,380)
                 .setStrokeLineWidth(4)
                 .setStrokeLineJoin("bevel")
                 .setColor(1,1,1);
-                
+
             me.fuel_group.createChild("path","fuellinefeed")
                 .moveTo(512,250)
                 .lineTo(512,380)
@@ -694,28 +694,28 @@ var MFD_DISPLAY = {
                 .setStrokeLineJoin("bevel")
                 .setColor(1,1,1);
 
-                
+
             me.fuel_group.createChild("text","fuelinfoleft")
                 .setAlignment("center-left")
                 .setFontSize(50)
                 .setFont("LiberationFonts/LiberationMono-Regular.ttf")
                 .setColor(1,1,1)
                 .setTranslation(155,400);
-                
+
             me.fuel_group.createChild("text","fuelinforight")
                 .setAlignment("center-left")
                 .setFontSize(50)
                 .setFont("LiberationFonts/LiberationMono-Regular.ttf")
                 .setColor(1,1,1)
                 .setTranslation(719,400);
-                
+
             me.fuel_group.createChild("text","fuelinfocenter")
                 .setAlignment("center-left")
                 .setFontSize(50)
                 .setFont("LiberationFonts/LiberationMono-Regular.ttf")
                 .setColor(1,1,1)
                 .setTranslation(437,500);
-                
+
             me.fuel_group.createChild("text","fuelinfoengine")
                 .setAlignment("center-left")
                 .setFontSize(45)
@@ -811,7 +811,7 @@ var MFD_DISPLAY = {
             me.fuel_group.getElementById("fuellinefeed").setColor(1,1,1);
         }
 
-        # time remaining = total fuel / fuel flow 
+        # time remaining = total fuel / fuel flow
         # distance remaining = speed * time
 
         me.fuel_group.getElementById("total_fuel").setText(sprintf("Total fuel..........%05.1f gals",me.fuel_total_prop.getValue()));
@@ -838,14 +838,12 @@ var MFD_DISPLAY = {
         reset_button_array();
         button_array[0] = button_status;
         me.update_labels();
-        # need:
-        # horizon indicator
-        # altitude tape
-        # speed tape
-        # v/s tape?
-        # maybe another compass?
+        # todo:
+        # sideslip
+        # compass
+        # print out roll somewhere
         if (me.vsi_group == nil) {
-            
+
             me.upper_limit = 180;
             me.lower_limit = 580;
             me.edge_dist = 130;
@@ -890,7 +888,7 @@ var MFD_DISPLAY = {
                 append(me.speedbars_minor, me.vsi_group.createChild("path","speedbarminor" ~ i)
                                             .line(-30,0)
                                             .setStrokeLineWidth(2)
-                                            .setColor(1,1,1));                                                                                                                                                            
+                                            .setColor(1,1,1));
             }
             me.vsi_group.createChild("path","speedmarker")
                 .moveTo(1024 - me.edge_dist,me.vert_center)
@@ -994,6 +992,71 @@ var MFD_DISPLAY = {
                                     .setColor(1,1,1)
                                     .setTranslation(1024 - me.edge_dist,me.lower_limit+50);
 
+            # alpha gauge
+            me.alpha_gauge_x = 700;
+            me.alpha_gauge_y = 700;
+            me.label_radius = 65;
+            me.alpha_gauge_radius = 50;
+            me.alpha_gauge_inner_min = 40;
+            me.alpha_gauge_inner_maj = 30;
+            me.alpha_gauge_degrees_per_alpha = 3; # how many degrees to move for each degree of alpha
+            me.min_alpha = -5;
+            me.max_alpha = 15;
+            me.draw_alpha = me.min_alpha;
+            me.current_deg = me.draw_alpha * me.alpha_gauge_degrees_per_alpha;
+
+            # text pathings
+            me.alpha_gauge_text = []
+            for (var i = 0; i < math.ceil((me.max_alpha - me.min_alpha) / 5); i = i + 1){
+                append(me.alpha_gauge_text, me.vsi_group.createChild("text","alpha_gauge_text" ~ i)
+                                            .setAlignment("right-center")
+                                            .setFontSize(20)
+                                            .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                            .setColor(1,1,1));
+            }
+            me.alpha_gauge_readout = me.vsi_group.createChild("text","alphagaugereadout")
+                                            .setAlignment("right-top")
+                                            .setFontSize(30)
+                                            .setFont("LiberationFonts/LiberationMono-Regular.ttf");
+                                            .setColor(1,1,1)
+                                            .setTranslation(me.alpha_gauge_x + 10, me_alpha_gauge_y + 10);
+
+            # gauge lines & adding text
+            me.alpha_gauge = me.vsi_group.createChild("path","alpha_gauge")
+                                    .setStrokeLineWidth(3)
+                                    .setColor(1,1,1)
+                                    .setTranslation(me.alpha_gauge_x,me.alpha_gauge_y);
+            var label = [];
+            var outer = [];
+            var inner = [];
+            var text_index = 0;
+            for(var i = 0; i < me.max_alpha - me.min_alpha; i = i + 1){
+                ; calcualate x/y offset;
+                outer = [-me.alpha_gauge_radius * math.cos(me.current_deg * D2R), -me.alpha_gauge_radius * math.sin(me.current_deg * D2R)];
+                if (math.mod(me.draw_alpha,5) == 0) {
+                    inner = [-me.alpha_gauge_inner_maj * math.cos(me.current_deg * D2R), -me.alpha_gauge_inner_maj * math.sin(me.current_deg * D2R)];
+                    label = [-me.label_radius * math.cos(me.current_deg * D2R), -me.label_radius * math.sin(me.current_deg * D2R)];
+                    me.alpha_gauge_text[text_index].setTranslation(label[0]+me.alpha_gauge_x,label[1]+me.alpha_gauge_y).setText(me.draw_alpha);
+                } else {
+                    inner = [-me.alpha_gauge_inner_min * math.cos(me.current_deg * D2R), -me.alpha_gauge_inner_min * math.sin(me.current_deg * D2R)];
+                }
+                me.alpha_gauge.moveTo(outer[0],outer[1]).lineTo(inner[0],inner[1]);
+                me.draw_alpha = me.draw_alpha + 1;
+                me.current_deg = me.draw_alpha * me.alpha_gauge_degrees_per_alpha;
+            }
+
+            # gauge needle - default rest should be pointing exactly left
+            me.alpha_gauge_needle_length = (me.alpha_gauge_radius + me.alpha_gauge_inner_min) / 2;
+            me.alpha_gauge_needle = me.vsi_group.createChild("path","alphagaugeneedle")
+                                        .line(-me.alpha_gauge_needle_length / 3    , -7)
+                                        .line(-me.alpha_gauge_needle_length / 3 * 2,  7)
+                                        .line( me.alpha_gauge_needle_length / 3 * 2,  7)
+                                        .line( me.alpha_gauge_needle_length / 3,     -7)
+                                        .setStrokeLineWidth(5)
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.alpha_gauge_x, me.alpha_gauge_y);
+
+
         }
         me.vsi_group.show();
         me.pitchbar_group.show();
@@ -1015,6 +1078,7 @@ var MFD_DISPLAY = {
         var altitude = getprop("position/altitude-ft");
         var pitch = getprop("orientation/pitch-deg");
         var roll = getprop("orientation/roll-deg");
+        var alpha = getprop("orientation/alpha-deg");
 
 
         # update text boxes
@@ -1022,7 +1086,7 @@ var MFD_DISPLAY = {
         me.vsi_vss_text.setText("V/S: " ~ math.round(v_speed*60,10));
         me.vsi_mch_text.setText(sprintf("MACH: %0.2f",mach));
         me.vsi_spd_text.setText("IAS: " ~ math.round(speed));
-        #me.vsi_vss_text = 
+        #me.vsi_vss_text =
         # speed tape update
         #  print('running');
 
@@ -1032,14 +1096,14 @@ var MFD_DISPLAY = {
         } else {
             var c_line = (me.lower_limit - me.speed_tape_pixel_per_knot * 2) + (math.mod(speed,2) * me.speed_tape_pixel_per_knot);
         }
- 
+
         # determine speed setting of the bottom bar
         if (speed < me.speed_tape_visible / 2) {
             var c_speed = 0;
         } else {
             var c_speed = (2 - math.mod((speed - me.speed_tape_visible / 2),2)) + (speed - me.speed_tape_visible / 2);
         }
-        
+
         # update loop
         var i_maj = 0;
         var i_min = 0;
@@ -1094,7 +1158,7 @@ var MFD_DISPLAY = {
         }
 
         # horizon circle
-        
+
         # calculate where to draw the upper/lower circles
 
         if(math.abs(pitch)<30) {
@@ -1139,6 +1203,10 @@ var MFD_DISPLAY = {
             c_line = c_line - (me.hor_indicator_pixels_per_degree * 10);
         }
         me.pitchbar_group.setRotation(-roll*D2R,0);
+
+        # alpha gauge stuff
+        me.alpha_gauge_needle.setRotation(alpha*D2R,0);
+        me.alpha_gauge_readout.setText(sprintf("α: %0.1f",alpha));
 
     },
 
@@ -1197,7 +1265,7 @@ mfd_ref = MFD_DISPLAY.new({"node": "mfdscreen"});
 var button_array = [];
 
 var button_arch = {
-    label: "", 
+    label: "",
     main_func: nil,
     init_func: nil,
     end_func:  nil,

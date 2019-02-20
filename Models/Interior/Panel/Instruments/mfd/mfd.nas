@@ -470,7 +470,7 @@ var MFD_DISPLAY = {
         #me.screen_sar_get_spread();
 
         if (me.sar_index_x == 0 and me.sar_index_y == 0) {
-            print('rsetting');
+            #print('rsetting');
             me.sar_pitch = pitch_prop.getValue();
             me.sar_heading = heading_prop.getValue();
             me.sar_geo.set_latlon(geo.aircraft_position().lat(), geo.aircraft_position().lon(), geo.aircraft_position().alt());
@@ -906,7 +906,7 @@ var MFD_DISPLAY = {
             me.altitude_tape_text = [];
             me.altitudebars_major = [];
             me.altitudebars_minor = [];
-            print(me.altitude_tape_pixel_per_100_feet);
+            #print(me.altitude_tape_pixel_per_100_feet);
             for (var i = 1; i <= math.ceil(me.altitude_tape_visible/1000); i = i + 1){
                 append(me.altitudebars_major, me.vsi_group.createChild("path","altitudebar" ~ i)
                                                 .line(50,0)
@@ -930,21 +930,101 @@ var MFD_DISPLAY = {
                 .setStrokeLineWidth(4)
                 .setColor(0.2,1.0,0.2);
 
+            # horizon circle
+            me.hor_indicator_max = 30; # in degrees
+            me.hor_indicator_radius = 200;
+            me.hor_y_center = me.vert_center;
+            me.hor_x_center = 1024 / 2;
+            me.hor_indicator_pixels_per_degree = me.hor_indicator_radius / me.hor_indicator_max;
+            me.upper_horizon = me.vsi_group.createChild("path","upper_horizon").setColorFill(0.2,0.2,1.0).setTranslation(me.hor_x_center,me.hor_y_center);
+            me.lower_horizon = me.vsi_group.createChild("path","lower_horizon").setColorFill(1.0,0.5,0.0).setTranslation(me.hor_x_center,me.hor_y_center);
+            me.nose_indicator = me.vsi_group.createChild("path","nose_indicator")
+                                    .move(-40,0)
+                                    .line(20,0)
+                                    .line(10,10)
+                                    .line(10,-10)
+                                    .line(10,10)
+                                    .line(10,-10)
+                                    .line(20,0)
+                                    .setTranslation(me.hor_x_center,me.hor_y_center)
+                                    .setStrokeLineWidth(6)
+                                    .setColor(1,1,1);
+            me.pitchbars = [];
+            me.pitchbars_text = [];
+            me.pitchbar_group = me.mfd.createGroup();
+            for (var i = 0; i <= math.ceil(me.hor_indicator_max / 10) + 2; i = i + 1){
+                append(me.pitchbars, me.pitchbar_group.createChild("path","pitchbars" ~ i)
+                                        .move(-80,0)
+                                        .line(50,0)
+                                        .move(60,0)
+                                        .line(50,0)
+                                        .setStrokeLineWidth(5)
+                                        .setColor(1,1,1));
+                append(me.pitchbars_text, me.pitchbar_group.createChild("text","pitch" ~ i)
+                                        .setAlignment("center-center")
+                                        .setFontSize(28)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1));
+            }
+            me.pitchbar_group.setTranslation(me.hor_x_center, me.hor_y_center);
+
+            # text boxes
+            me.vsi_alt_text = me.vsi_group.createChild("text","alt_disp")
+                                    .setAlignment("left-top")
+                                    .setFontSize(28)
+                                    .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                    .setColor(1,1,1)
+                                    .setTranslation(me.edge_dist,me.lower_limit+15);
+            me.vsi_vss_text = me.vsi_group.createChild("text","spd_disp")
+                                    .setAlignment("left-top")
+                                    .setFontSize(28)
+                                    .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                    .setColor(1,1,1)
+                                    .setTranslation(me.edge_dist,me.lower_limit+50);
+            me.vsi_spd_text = me.vsi_group.createChild("text","spd_disp")
+                                    .setAlignment("right-top")
+                                    .setFontSize(28)
+                                    .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                    .setColor(1,1,1)
+                                    .setTranslation(1024 - me.edge_dist,me.lower_limit+15);
+            me.vsi_mch_text = me.vsi_group.createChild("text","spd_disp")
+                                    .setAlignment("right-top")
+                                    .setFontSize(28)
+                                    .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                    .setColor(1,1,1)
+                                    .setTranslation(1024 - me.edge_dist,me.lower_limit+50);
+
         }
         me.vsi_group.show();
+        me.pitchbar_group.show();
 
     },
 
     screen_vsi_rem: func() {
         if (me.vsi_group != nil) {
             me.vsi_group.hide();
+            me.pitchbar_group.hide();
         }
     },
 
     screen_vsi: func() {
+        #  get properties
+        var speed = getprop("velocities/airspeed-kt");
+        var v_speed = getprop("velocities/vertical-speed-fps");
+        var mach = getprop("velocities/mach");
+        var altitude = getprop("position/altitude-ft");
+        var pitch = getprop("orientation/pitch-deg");
+        var roll = getprop("orientation/roll-deg");
+
+
+        # update text boxes
+        me.vsi_alt_text.setText("ALT: " ~ math.round(altitude,10));
+        me.vsi_vss_text.setText("V/S: " ~ math.round(v_speed*60,10));
+        me.vsi_mch_text.setText(sprintf("MACH: %0.2f",mach));
+        me.vsi_spd_text.setText("IAS: " ~ math.round(speed));
+        #me.vsi_vss_text = 
         # speed tape update
         #  print('running');
-        var speed = getprop("velocities/airspeed-kt");
 
         # determine distance to bottom bar
         if (speed < me.speed_tape_visible / 2) {
@@ -987,8 +1067,6 @@ var MFD_DISPLAY = {
 
         # altitude tape update
 
-        var altitude = getprop("position/altitude-ft");
-
         # determine bottom bar location
         c_line = (me.lower_limit - me.altitude_tape_pixel_per_100_feet * 2) + (math.mod(altitude,200) * (me.altitude_tape_pixel_per_100_feet/100));
         #var c_alt = (200 - math.mod((altitude - me.altitude_tape_visible / 200),200)) + (altitude - me.altitude_tape_visible / 200);
@@ -1014,7 +1092,54 @@ var MFD_DISPLAY = {
             c_alt = c_alt + 200;
             c_line = c_line - (me.altitude_tape_pixel_per_100_feet * 2);
         }
+
+        # horizon circle
         
+        # calculate where to draw the upper/lower circles
+
+        if(math.abs(pitch)<30) {
+            var y_val = pitch * me.hor_indicator_pixels_per_degree;
+            var x_val = -math.sqrt(me.hor_indicator_radius * me.hor_indicator_radius - y_val * y_val);
+        } else {
+            var y_val = math.sgn(pitch) * me.hor_indicator_radius;
+            var x_val = -0.1;
+        }
+
+        # print(pitch ~ "|" ~ x_val ~ "|" ~ y_val);
+
+        if (pitch > 0) {
+            # nose is pointing up
+            # more blue than brown
+            me.upper_horizon.reset().move(x_val,y_val).arcLargeCW(me.hor_indicator_radius,me.hor_indicator_radius,0,x_val * -2,0).setRotation(-roll*D2R,0);
+            me.lower_horizon.reset().move(x_val,y_val).arcSmallCCW(me.hor_indicator_radius,me.hor_indicator_radius,0,x_val * -2,0).setRotation(-roll*D2R,0);
+        } else {
+            me.upper_horizon.reset().move(x_val,y_val).arcSmallCW(me.hor_indicator_radius,me.hor_indicator_radius,0,x_val * -2,0).setRotation(-roll*D2R,0);
+            me.lower_horizon.reset().move(x_val,y_val).arcLargeCCW(me.hor_indicator_radius,me.hor_indicator_radius,0,x_val * -2,0).setRotation(-roll*D2R,0);
+        }
+
+        #assumed: one pitch bar every 10 degrees
+
+        # determine bottom bar location
+        #print("bottom: " ~ (me.hor_y_center + me.hor_indicator_radius));
+        c_line = (me.hor_indicator_radius - me.hor_indicator_pixels_per_degree * 10) + (math.mod(pitch,10) * (me.hor_indicator_pixels_per_degree));
+        #print("c_line: " ~ c_line);
+        var c_pitch = pitch - math.mod(pitch,10) - 20;
+        for (var i = 0; i <= math.ceil(me.hor_indicator_max / 10) + 2; i = i + 1) {
+            #if (c_line < me.upper_limit) {
+            #    break;
+            #}
+            if (c_line < me.hor_indicator_radius - 25 and c_line > -me.hor_indicator_radius + 25){
+                me.pitchbars[i].setTranslation(0,c_line).show();
+                me.pitchbars_text[i].setTranslation(0,c_line).setText(c_pitch).show();
+            } else {
+                me.pitchbars[i].hide();
+                me.pitchbars_text[i].hide();
+            }
+            c_pitch = c_pitch + 10;
+            c_line = c_line - (me.hor_indicator_pixels_per_degree * 10);
+        }
+        me.pitchbar_group.setRotation(-roll*D2R,0);
+
     },
 
     screen_map_init: func() {

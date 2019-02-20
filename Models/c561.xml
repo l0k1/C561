@@ -6,24 +6,11 @@
 
   <nasal>
     <load>
-      var livery_update = aircraft.livery_update.new("Aircraft/C561/Models/Liveries", 10);
-
-      var self = cmdarg();
-
-      var float_0 = self.getNode("sim/multiplay/generic/float[0]", 1);
-      var float_1 = self.getNode("sim/multiplay/generic/float[1]", 1);
-
-      var crew_door = self.getNode("instrumentation/doors/crew/position-norm", 1);
-      var passenger_door = self.getNode("instrumentation/doors/passenger/position-norm", 1);
-
-      crew_door.alias(float_0);
-      passenger_door.alias(float_1);
+      var livery_update = aircraft.livery_update.new("Aircraft/C561/Models/Liveries");
     </load>
 
     <unload>
       livery_update.stop();
-      crew_door.unalias();
-      passenger_door.unalias();
     </unload>
   </nasal>
 
@@ -96,7 +83,7 @@
 
     <property-base>sim/model/livery</property-base>
     <texture-prop>texture</texture-prop>
-    <texture>Aircraft/C561/Models/Liveries/texture.png</texture>
+    <texture>Liveries/texture.png</texture>
 
     <specular>
       <red-prop>specular/red</red-prop>

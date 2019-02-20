@@ -38,7 +38,7 @@
       <path archive="y">Aircraft/C561/Models/c561.xml</path>
       <fuelselector type="int">false</fuelselector>
       <livery>
-        <file type="string">default</file>
+        <file type="string">Grey</file>
       </livery>
     </model>
     

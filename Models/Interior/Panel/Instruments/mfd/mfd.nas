@@ -865,9 +865,11 @@ var MFD_DISPLAY = {
                 .setStrokeLineWidth(4)
                 .setStrokeLineJoin("bevel")
                 .setColor(1,1,1);
-
-            # speedbar stuff
-
+                
+            ################
+            # speedtape stuff
+            ################
+            
             me.speed_tape_visible = 60; #how many knots to show at one time
             me.speed_tape_pixel_per_knot = (me.lower_limit - me.upper_limit) / me.speed_tape_visible;
             me.speed_tape_text = [];
@@ -896,8 +898,9 @@ var MFD_DISPLAY = {
                 .setStrokeLineWidth(4)
                 .setColor(0.2,1.0,0.2);
 
+            ################
             # altitude tape stuff
-            # for now, same amount of lines as the speed tape
+            ################
 
             me.altitude_tape_visible = 4000; # how many feet to show at one time
             me.altitude_tape_pixel_per_100_feet = (me.lower_limit - me.upper_limit) / (me.altitude_tape_visible / 100);
@@ -928,7 +931,10 @@ var MFD_DISPLAY = {
                 .setStrokeLineWidth(4)
                 .setColor(0.2,1.0,0.2);
 
+            ################
             # horizon circle
+            ################
+            
             me.hor_indicator_max = 30; # in degrees
             me.hor_indicator_radius = 200;
             me.hor_y_center = me.vert_center;
@@ -992,7 +998,10 @@ var MFD_DISPLAY = {
                                     .setColor(1,1,1)
                                     .setTranslation(1024 - me.edge_dist,me.lower_limit+50);
 
+            ################
             # alpha gauge
+            ################
+            
             me.alpha_gauge_x = 700;
             me.alpha_gauge_y = 700;
             me.label_radius = 65;
@@ -1055,7 +1064,43 @@ var MFD_DISPLAY = {
                                         .setStrokeLineWidth(5)
                                         .setColor(1,1,1)
                                         .setTranslation(me.alpha_gauge_x, me.alpha_gauge_y);
-
+                                        
+            ################
+            # sideslip gauge
+            ################
+            me.sideslip_bar_length = 100;
+            me.sideslip_bar_height = 60;
+            me.sideslip_indicator_size = 25;
+            me.sideslip_max_deflection = 5;
+            me.sideslip_text_offset = 30;
+            me.sideslip_x = 700;
+            me.sideslip_y = 850;
+            
+            me.sideslip_text_offset = me.sideslip_text_offset + me.sideslip_indicator_size;
+            me.sideslip_pixels_per_degree = me.sideslip_bar_length / (me.sideslip_max_deflection * 2);
+            
+            me.sideslip_gauge_bar = me.vsi_group.createChild("path","sideslipgaugebar")
+                                        .move(0,-me.sideslip_bar_height/2)
+                                        .line(0, me.sideslip_bar_height)
+                                        .move(-me.sideslip_bar_length/2,-me.sideslip_bar_height/2)
+                                        .line( me.sideslip_bar_length,0)
+                                        .setStrokeLineWidth(4)
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.sideslip_x, me.sideslip_y);
+            me.sideslip_gauge_indicator = me.vsi_group.createChild("path","sideslipindicator")
+                                        .moveTo(me.sideslip_indicator_size,0)
+                                        .lineTo(0,me.sideslip_indicator_size)
+                                        .lineTo(-me.sideslip_indicator_size, 0)
+                                        .lineTo(0,-me.sideslip_indicator_size)
+                                        .lineTo(me.sideslip_indicator_size, 0)
+                                        .setStrokeLineWidth(4)
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.sideslip_x, me.sideslip_y);
+            me.sideslip_gauge_readout = me.vsi_group.createChild("text","sideslip_gauge_readout")
+                                        .setAlignment("center-bottom")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf");
+                                        .setColor(1,1,1);
 
         }
         me.vsi_group.show();
@@ -1079,6 +1124,7 @@ var MFD_DISPLAY = {
         var pitch = getprop("orientation/pitch-deg");
         var roll = getprop("orientation/roll-deg");
         var alpha = getprop("orientation/alpha-deg");
+        var beta = getprop("orientation/beta-deg");
 
 
         # update text boxes
@@ -1128,9 +1174,11 @@ var MFD_DISPLAY = {
             #print('c_line: ' ~ c_line);
             c_line = c_line - (me.speed_tape_pixel_per_knot * 2);
         }
-
+        
+        ################
         # altitude tape update
-
+        ################
+        
         # determine bottom bar location
         c_line = (me.lower_limit - me.altitude_tape_pixel_per_100_feet * 2) + (math.mod(altitude,200) * (me.altitude_tape_pixel_per_100_feet/100));
         #var c_alt = (200 - math.mod((altitude - me.altitude_tape_visible / 200),200)) + (altitude - me.altitude_tape_visible / 200);
@@ -1156,8 +1204,10 @@ var MFD_DISPLAY = {
             c_alt = c_alt + 200;
             c_line = c_line - (me.altitude_tape_pixel_per_100_feet * 2);
         }
-
+        
+        ################
         # horizon circle
+        ################
 
         # calculate where to draw the upper/lower circles
 
@@ -1203,10 +1253,21 @@ var MFD_DISPLAY = {
             c_line = c_line - (me.hor_indicator_pixels_per_degree * 10);
         }
         me.pitchbar_group.setRotation(-roll*D2R,0);
-
+        
+        ################
         # alpha gauge stuff
+        ################
+        
         me.alpha_gauge_needle.setRotation(alpha*D2R,0);
         me.alpha_gauge_readout.setText(sprintf("α: %0.1f",alpha));
+        
+        
+        ################
+        # sideslip gauge stuff
+        ################
+        me.sideslip_gauge_indicator.setTranslation(me.sideslip_x + (beta * me.sideslip_pixels_per_degree),me.sideslip_y);
+        me.sideslip_gauge_readout.setTranslation(me.sideslip_x + (beta * me.sideslip_pixels_per_degree),me.sideslip_y + me.sideslip_text_offset).setText(sprintf("β: %0.1f",beta));
+            
 
     },
 

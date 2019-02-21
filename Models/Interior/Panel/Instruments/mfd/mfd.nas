@@ -835,7 +835,8 @@ var MFD_DISPLAY = {
     },
 
     screen_vsi_init: func() {
-        reset_button_array();
+        #reset_button_array();
+        test_button_array();
         button_array[0] = button_status;
         me.update_labels();
         # todo:
@@ -1002,12 +1003,12 @@ var MFD_DISPLAY = {
             # alpha gauge
             ################
             
-            me.alpha_gauge_x = 700;
-            me.alpha_gauge_y = 700;
-            me.label_radius = 65;
-            me.alpha_gauge_radius = 50;
-            me.alpha_gauge_inner_min = 40;
-            me.alpha_gauge_inner_maj = 30;
+            me.alpha_gauge_x = 800;
+            me.alpha_gauge_y = 800;
+            me.label_radius = 150;
+            me.alpha_gauge_radius = 130;
+            me.alpha_gauge_inner_min = 120;
+            me.alpha_gauge_inner_maj = 100;
             me.alpha_gauge_degrees_per_alpha = 3; # how many degrees to move for each degree of alpha
             me.min_alpha = -5;
             me.max_alpha = 15;
@@ -1015,8 +1016,8 @@ var MFD_DISPLAY = {
             me.current_deg = me.draw_alpha * me.alpha_gauge_degrees_per_alpha;
 
             # text pathings
-            me.alpha_gauge_text = []
-            for (var i = 0; i < math.ceil((me.max_alpha - me.min_alpha) / 5); i = i + 1){
+            me.alpha_gauge_text = [];
+            for (var i = 0; i < math.ceil((me.max_alpha - me.min_alpha) / 5) + 1; i = i + 1){
                 append(me.alpha_gauge_text, me.vsi_group.createChild("text","alpha_gauge_text" ~ i)
                                             .setAlignment("right-center")
                                             .setFontSize(20)
@@ -1024,11 +1025,11 @@ var MFD_DISPLAY = {
                                             .setColor(1,1,1));
             }
             me.alpha_gauge_readout = me.vsi_group.createChild("text","alphagaugereadout")
-                                            .setAlignment("right-top")
+                                            .setAlignment("left-top")
                                             .setFontSize(30)
-                                            .setFont("LiberationFonts/LiberationMono-Regular.ttf");
+                                            .setFont("LiberationFonts/LiberationMono-Regular.ttf")
                                             .setColor(1,1,1)
-                                            .setTranslation(me.alpha_gauge_x + 10, me_alpha_gauge_y + 10);
+                                            .setTranslation(me.alpha_gauge_x + 10, me.alpha_gauge_y + 10);
 
             # gauge lines & adding text
             me.alpha_gauge = me.vsi_group.createChild("path","alpha_gauge")
@@ -1039,18 +1040,18 @@ var MFD_DISPLAY = {
             var outer = [];
             var inner = [];
             var text_index = 0;
-            for(var i = 0; i < me.max_alpha - me.min_alpha; i = i + 1){
-                ; calcualate x/y offset;
+            for(var i = 0; i < me.max_alpha - me.min_alpha + 1; i = i + 1){
                 outer = [-me.alpha_gauge_radius * math.cos(me.current_deg * D2R), -me.alpha_gauge_radius * math.sin(me.current_deg * D2R)];
                 if (math.mod(me.draw_alpha,5) == 0) {
                     inner = [-me.alpha_gauge_inner_maj * math.cos(me.current_deg * D2R), -me.alpha_gauge_inner_maj * math.sin(me.current_deg * D2R)];
                     label = [-me.label_radius * math.cos(me.current_deg * D2R), -me.label_radius * math.sin(me.current_deg * D2R)];
                     me.alpha_gauge_text[text_index].setTranslation(label[0]+me.alpha_gauge_x,label[1]+me.alpha_gauge_y).setText(me.draw_alpha);
+                    text_index += 1;
                 } else {
                     inner = [-me.alpha_gauge_inner_min * math.cos(me.current_deg * D2R), -me.alpha_gauge_inner_min * math.sin(me.current_deg * D2R)];
                 }
                 me.alpha_gauge.moveTo(outer[0],outer[1]).lineTo(inner[0],inner[1]);
-                me.draw_alpha = me.draw_alpha + 1;
+                me.draw_alpha += 1;
                 me.current_deg = me.draw_alpha * me.alpha_gauge_degrees_per_alpha;
             }
 
@@ -1068,13 +1069,13 @@ var MFD_DISPLAY = {
             ################
             # sideslip gauge
             ################
-            me.sideslip_bar_length = 100;
+            me.sideslip_x = 800;
+            me.sideslip_y = 900;
+            me.sideslip_bar_length = 250;
             me.sideslip_bar_height = 60;
             me.sideslip_indicator_size = 25;
             me.sideslip_max_deflection = 5;
             me.sideslip_text_offset = 30;
-            me.sideslip_x = 700;
-            me.sideslip_y = 850;
             
             me.sideslip_text_offset = me.sideslip_text_offset + me.sideslip_indicator_size;
             me.sideslip_pixels_per_degree = me.sideslip_bar_length / (me.sideslip_max_deflection * 2);
@@ -1099,7 +1100,7 @@ var MFD_DISPLAY = {
             me.sideslip_gauge_readout = me.vsi_group.createChild("text","sideslip_gauge_readout")
                                         .setAlignment("center-bottom")
                                         .setFontSize(30)
-                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf");
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
                                         .setColor(1,1,1);
 
         }
@@ -1124,7 +1125,7 @@ var MFD_DISPLAY = {
         var pitch = getprop("orientation/pitch-deg");
         var roll = getprop("orientation/roll-deg");
         var alpha = getprop("orientation/alpha-deg");
-        var beta = getprop("orientation/beta-deg");
+        var beta = getprop("orientation/side-slip-deg");
 
 
         # update text boxes
@@ -1258,15 +1259,25 @@ var MFD_DISPLAY = {
         # alpha gauge stuff
         ################
         
-        me.alpha_gauge_needle.setRotation(alpha*D2R,0);
         me.alpha_gauge_readout.setText(sprintf("α: %0.1f",alpha));
+        if (alpha < me.min_alpha) {
+            alpha = me.min_alpha;
+        } elsif (alpha > me.max_alpha) {
+            alpha = me.max_alpha;
+        }
+        me.alpha_gauge_needle.setRotation(alpha*D2R,0);
         
         
         ################
         # sideslip gauge stuff
         ################
+
+        me.sideslip_gauge_readout.setText(sprintf("β: %0.1f",beta));
+        if (math.abs(beta) > me.sideslip_max_deflection) {
+            beta = math.sgn(beta) * me.sideslip_max_deflection;
+        }
+        me.sideslip_gauge_readout.setTranslation(me.sideslip_x + (beta * me.sideslip_pixels_per_degree),me.sideslip_y + me.sideslip_text_offset);
         me.sideslip_gauge_indicator.setTranslation(me.sideslip_x + (beta * me.sideslip_pixels_per_degree),me.sideslip_y);
-        me.sideslip_gauge_readout.setTranslation(me.sideslip_x + (beta * me.sideslip_pixels_per_degree),me.sideslip_y + me.sideslip_text_offset).setText(sprintf("β: %0.1f",beta));
             
 
     },
@@ -1313,6 +1324,12 @@ var reset_button_array = func() {
     }
 }
 
+var test_button_array = func() {
+    for (i = 0; i < 20; i = i + 1) {
+        button_array[i] = button_xxxx;
+    }
+}
+
 var main_loop = func() {
     if (cur_main_func != nil) {
         call(cur_main_func, nil, mfd_ref );
@@ -1336,6 +1353,7 @@ var button_arch = {
 # button definitions
 var button_null   = {parents:[button_arch]};
 var button_test   = {parents:[button_arch], label: "TEST", main_func: mfd_ref.screen_testfunc};
+var button_xxxx   = {parents:[button_arch], label: "NULL"};
 var button_status = {parents:[button_arch], label: "STAT", main_func: mfd_ref.screen_status, init_func: mfd_ref.screen_status_init, end_func: mfd_ref.screen_status_rem};
 var button_sar    = {parents:[button_arch], label: "TSAR", main_func: mfd_ref.screen_sar,    init_func: mfd_ref.screen_sar_init,    end_func: mfd_ref.screen_sar_rem   };
 var button_fuel   = {parents:[button_arch], label: "FUEL", main_func: mfd_ref.screen_fuel,   init_func: mfd_ref.screen_fuel_init,   end_func: mfd_ref.screen_fuel_rem  };

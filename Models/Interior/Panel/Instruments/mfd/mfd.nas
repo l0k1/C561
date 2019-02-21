@@ -1265,7 +1265,7 @@ var MFD_DISPLAY = {
         } elsif (alpha > me.max_alpha) {
             alpha = me.max_alpha;
         }
-        me.alpha_gauge_needle.setRotation(alpha*D2R,0);
+        me.alpha_gauge_needle.setRotation(alpha*me.alpha_gauge_degrees_per_alpha*D2R,0);
         
         
         ################

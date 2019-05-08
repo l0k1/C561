@@ -617,6 +617,7 @@ var MFD_DISPLAY = {
     screen_fuel_init: func() {
         reset_button_array();
         button_array[0] = button_status;
+        button_array[2] = button_vsi;
         me.update_labels();
         # we need a simple diagram for the plane
         # we need lines connecting the tanks to an "Engine"
@@ -835,9 +836,16 @@ var MFD_DISPLAY = {
     },
 
     screen_vsi_init: func() {
-        #reset_button_array();
+        reset_button_array();
         test_button_array();
         button_array[0] = button_status;
+        button_array[1] = button_fuel;
+
+        button_array[16] = button_ap_heading_upp;
+        button_array[17] = button_ap_heading_up;
+        button_array[18] = button_ap_heading_dn;
+        button_array[19] = button_ap_heading_dnn;
+
         me.update_labels();
         # todo:
         # sideslip
@@ -933,6 +941,63 @@ var MFD_DISPLAY = {
                 .setColor(0.2,1.0,0.2);
 
             ################
+            # compass tape stuff
+            ################
+
+            me.compass_tape_visible = 40; # how many degrees to show at one time
+            me.compass_tape_width = 300 * 2;
+            me.compass_tape_y = 65;
+            me.compass_tape_pixel_per_degree = me.compass_tape_width / me.compass_tape_visible;
+            me.compass_tape_text = [];
+            me.compassbars_major = [];
+            me.compassbars_minor = [];
+            for (var i = 1; i <= math.ceil(me.compass_tape_visible/5); i = i + 1){
+                append(me.compassbars_major, me.vsi_group.createChild("path","compassbar" ~ i)
+                                                .line(0,40)
+                                                .setStrokeLineWidth(4)
+                                                .setColor(1,1,1));
+                append(me.compass_tape_text, me.vsi_group.createChild("text","comptape_read" ~ i)
+                                                .setAlignment("center-top")
+                                                .setFontSize(25)
+                                                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                                .setColor(1,1,1));
+            }
+            for(var i = 1; i <= 4 * math.ceil(me.compass_tape_visible/5); i = i + 1){
+                append(me.compassbars_minor, me.vsi_group.createChild("path","compassbarminor" ~ i)
+                                                .line(0,20)
+                                                .setStrokeLineWidth(2)
+                                                .setColor(1,1,1));
+            }
+            me.compass_dir_indicator = me.vsi_group.createChild("path","compassdirindicator")
+                                                .line(7,0)
+                                                .line(-7,10)
+                                                .line(-7,-10)
+                                                .line(7,0)
+                                                .setStrokeLineWidth(2)
+                                                .setColor(1,1,1)
+                                                .setColorFill(1,1,1)
+                                                .setTranslation(512, me.compass_tape_y);
+            me.compass_heading_indicator = me.vsi_group.createChild("path","compassdirindicator")
+                                                .line(9,0)
+                                                .line(-9,-12)
+                                                .line(-9,12)
+                                                .line(9,0)
+                                                .setStrokeLineWidth(4)
+                                                .setColor(1,1,0);
+            me.compass_heading_text = me.vsi_group.createChild("text","cmp_display")
+                                    .setAlignment("right-top")
+                                    .setFontSize(28)
+                                    .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                    .setColor(1,1,1)
+                                    .setTranslation(512 - me.compass_tape_width / 2 - 10,me.compass_tape_y);
+            me.ap_heading_text = me.vsi_group.createChild("text","cmp_display")
+                                    .setAlignment("left-top")
+                                    .setFontSize(28)
+                                    .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                    .setColor(1,1,1)
+                                    .setTranslation(512 + me.compass_tape_width / 2 + 10,me.compass_tape_y);
+
+            ################
             # horizon circle
             ################
             
@@ -1003,7 +1068,7 @@ var MFD_DISPLAY = {
             # alpha gauge
             ################
             
-            me.alpha_gauge_x = 800;
+            me.alpha_gauge_x = 850;
             me.alpha_gauge_y = 800;
             me.label_radius = 150;
             me.alpha_gauge_radius = 130;
@@ -1029,7 +1094,7 @@ var MFD_DISPLAY = {
                                             .setFontSize(30)
                                             .setFont("LiberationFonts/LiberationMono-Regular.ttf")
                                             .setColor(1,1,1)
-                                            .setTranslation(me.alpha_gauge_x + 10, me.alpha_gauge_y + 10);
+                                            .setTranslation(me.alpha_gauge_x - 70, me.alpha_gauge_y + 30);
 
             # gauge lines & adding text
             me.alpha_gauge = me.vsi_group.createChild("path","alpha_gauge")
@@ -1103,10 +1168,142 @@ var MFD_DISPLAY = {
                                         .setFont("LiberationFonts/LiberationMono-Regular.ttf")
                                         .setColor(1,1,1);
 
+            me.engine_rpm_guage_x = 200;
+            me.engine_rpm_guage_y = 840;
+            me.engine_rpm_guage_length = 100;
+            me.engine_rpm_guage_height = 20;
+            me.engine_rpm_guage_text_offset = 10;
+            me.engine_rpm_min = 0;
+            me.engine_rpm_max = 4000;
+
+            me.engine_rpm_gauge = me.vsi_group.createChild("path","engine_rpm_gauge")
+                                        .line(0,me.engine_rpm_guage_height)
+                                        .line(me.engine_rpm_guage_length,0)
+                                        .line(0,-me.engine_rpm_guage_height)
+                                        .line(-me.engine_rpm_guage_length,0)
+                                        .setStrokeLineWidth(4)
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_rpm_guage_x,me.engine_rpm_guage_y);
+            me.engine_rpm_slider = me.vsi_group.createChild("path","engine_rpm_slider")
+                                        .setColor(0.1,1.0,0.1)
+                                        .setColorFill(0.1,1.0,0.1);
+            me.engine_rpm_label =  me.vsi_group.createChild("text","engine_rpm_gauge_label")
+                                        .setAlignment("right-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_rpm_guage_x - me.engine_rpm_guage_text_offset, me.engine_rpm_guage_y)
+                                        .setText("RPM");
+            me.engine_rpm_readout =  me.vsi_group.createChild("text","engine_rpm_readout_label")
+                                        .setAlignment("left-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_rpm_guage_length + me.engine_rpm_guage_x + me.engine_rpm_guage_text_offset, me.engine_rpm_guage_y);
+
+            me.engine_temp_guage_x = 200;
+            me.engine_temp_guage_y = 870;
+            me.engine_temp_guage_length = 100;
+            me.engine_temp_guage_height = 20;
+            me.engine_temp_guage_text_offset = 10;
+            me.engine_temp_min_temp = 1200;
+            me.engine_temp_max_temp = 1800;
+
+            me.engine_temp_gauge = me.vsi_group.createChild("path","engine_temp_gauge")
+                                        .line(0,me.engine_temp_guage_height)
+                                        .line(me.engine_temp_guage_length,0)
+                                        .line(0,-me.engine_temp_guage_height)
+                                        .line(-me.engine_temp_guage_length,0)
+                                        .setStrokeLineWidth(4)
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_temp_guage_x,me.engine_temp_guage_y);
+            me.engine_temp_slider = me.vsi_group.createChild("path","engine_temp_slider")
+                                        .setColor(0.1,1.0,0.1)
+                                        .setColorFill(0.1,1.0,0.1);
+            me.engine_temp_label =  me.vsi_group.createChild("text","engine_temp_gauge_label")
+                                        .setAlignment("right-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_temp_guage_x - me.engine_temp_guage_text_offset, me.engine_temp_guage_y)
+                                        .setText("EGT-F");
+            me.engine_temp_readout =  me.vsi_group.createChild("text","engine_temp_readout_label")
+                                        .setAlignment("left-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_temp_guage_length + me.engine_temp_guage_x + me.engine_temp_guage_text_offset, me.engine_temp_guage_y);
+
+
+            me.engine_fuel_guage_x = 200;
+            me.engine_fuel_guage_y = 900;
+            me.engine_fuel_guage_length = 100;
+            me.engine_fuel_guage_height = 20;
+            me.engine_fuel_guage_text_offset = 10;
+            me.engine_fuel_min = 0;
+            me.engine_fuel_max = 35;
+
+            me.engine_fuel_gauge = me.vsi_group.createChild("path","engine_fuel_gauge")
+                                        .line(0,me.engine_fuel_guage_height)
+                                        .line(me.engine_fuel_guage_length,0)
+                                        .line(0,-me.engine_fuel_guage_height)
+                                        .line(-me.engine_fuel_guage_length,0)
+                                        .setStrokeLineWidth(4)
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_fuel_guage_x,me.engine_fuel_guage_y);
+            me.engine_fuel_slider = me.vsi_group.createChild("path","engine_fuel_slider")
+                                        .setColor(0.1,1.0,0.1)
+                                        .setColorFill(0.1,1.0,0.1);
+            me.engine_fuel_label =  me.vsi_group.createChild("text","engine_fuel_gauge_label")
+                                        .setAlignment("right-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_fuel_guage_x - me.engine_fuel_guage_text_offset, me.engine_fuel_guage_y)
+                                        .setText("FLOW");
+            me.engine_fuel_readout =  me.vsi_group.createChild("text","engine_fuel_readout_label")
+                                        .setAlignment("left-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_fuel_guage_length + me.engine_fuel_guage_x + me.engine_fuel_guage_text_offset, me.engine_fuel_guage_y);
+
+
+            me.engine_manipres_guage_x = 200;
+            me.engine_manipres_guage_y = 930;
+            me.engine_manipres_guage_length = 100;
+            me.engine_manipres_guage_height = 20;
+            me.engine_manipres_guage_text_offset = 10;
+            me.engine_manipres_min = 0;
+            me.engine_manipres_max = 30;
+
+            me.engine_manipres_gauge = me.vsi_group.createChild("path","engine_manipres_gauge")
+                                        .line(0,me.engine_manipres_guage_height)
+                                        .line(me.engine_manipres_guage_length,0)
+                                        .line(0,-me.engine_manipres_guage_height)
+                                        .line(-me.engine_manipres_guage_length,0)
+                                        .setStrokeLineWidth(4)
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_manipres_guage_x,me.engine_manipres_guage_y);
+            me.engine_manipres_slider = me.vsi_group.createChild("path","engine_manipres_slider")
+                                        .setColor(0.1,1.0,0.1)
+                                        .setColorFill(0.1,1.0,0.1);
+            me.engine_manipres_label =  me.vsi_group.createChild("text","engine_manipres_gauge_label")
+                                        .setAlignment("right-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_manipres_guage_x - me.engine_manipres_guage_text_offset, me.engine_manipres_guage_y)
+                                        .setText("PRES");
+            me.engine_manipres_readout =  me.vsi_group.createChild("text","engine_manipres_readout_label")
+                                        .setAlignment("left-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_manipres_guage_length + me.engine_manipres_guage_x + me.engine_manipres_guage_text_offset, me.engine_manipres_guage_y);
         }
         me.vsi_group.show();
         me.pitchbar_group.show();
-
     },
 
     screen_vsi_rem: func() {
@@ -1122,10 +1319,16 @@ var MFD_DISPLAY = {
         var v_speed = getprop("velocities/vertical-speed-fps");
         var mach = getprop("velocities/mach");
         var altitude = getprop("position/altitude-ft");
+        var heading = getprop("orientation/heading-magnetic-deg");
+        var ap_heading = getprop("it-stec55x/input/hdg");
         var pitch = getprop("orientation/pitch-deg");
         var roll = getprop("orientation/roll-deg");
         var alpha = getprop("orientation/alpha-deg");
         var beta = getprop("orientation/side-slip-deg");
+        var eng_temp = getprop("/engines/engine/egt-degf");
+        var eng_rpm = getprop("/engines/engine/rpm");
+        var eng_flow = getprop("/engines/engine/fuel-flow-gph");
+        var eng_pres = getprop("/engines/engine/mp-inhg");
 
 
         # update text boxes
@@ -1133,6 +1336,12 @@ var MFD_DISPLAY = {
         me.vsi_vss_text.setText("V/S: " ~ math.round(v_speed*60,10));
         me.vsi_mch_text.setText(sprintf("MACH: %0.2f",mach));
         me.vsi_spd_text.setText("IAS: " ~ math.round(speed));
+        me.engine_temp_readout.setText(math.round(eng_temp));
+        me.engine_rpm_readout.setText(math.round(eng_rpm));
+        me.engine_fuel_readout.setText(sprintf("%0.2f",eng_flow));
+        me.engine_manipres_readout.setText(sprintf("%0.2f",eng_pres));
+        me.compass_heading_text.setText("HDG: " ~ math.round(heading));
+        me.ap_heading_text.setText("AP: " ~ math.round(ap_heading));
         #me.vsi_vss_text =
         # speed tape update
         #  print('running');
@@ -1205,7 +1414,36 @@ var MFD_DISPLAY = {
             c_alt = c_alt + 200;
             c_line = c_line - (me.altitude_tape_pixel_per_100_feet * 2);
         }
-        
+
+        ################
+        # compass tape update
+        ################
+
+        # determine leftmost line position
+        var hider = 1;
+        c_line = (512 - 300) - (math.mod(heading,1) * me.compass_tape_pixel_per_degree);
+        var c_hdg = (heading - (me.compass_tape_visible / 2)) - math.mod(heading,1);
+        i_min = 0;
+        i_maj = 0;
+        for (var i = 1; i <= me.compass_tape_visible; i = i + 1) {
+            if (math.mod(c_hdg,5) == 0) {
+                me.compassbars_major[i_maj].setTranslation(c_line,me.compass_tape_y);
+                me.compass_tape_text[i_maj].setTranslation(c_line,me.compass_tape_y + 42).setText(math.periodic(0,360,c_hdg));
+                i_maj = i_maj + 1;
+            } else {
+                me.compassbars_minor[i_min].setTranslation(c_line,me.compass_tape_y);
+                i_min = i_min + 1;
+            }
+            if(c_hdg == ap_heading) {
+                hider = 0;
+                me.compass_heading_indicator.show().setTranslation(c_line,me.compass_tape_y + 40);
+            }
+            c_hdg = c_hdg + 1;
+            c_line = c_line + me.compass_tape_pixel_per_degree;
+        }
+        if (hider and me.compass_heading_indicator.getVisible()) {
+            me.compass_heading_indicator.hide();
+        }
         ################
         # horizon circle
         ################
@@ -1278,12 +1516,44 @@ var MFD_DISPLAY = {
         }
         me.sideslip_gauge_readout.setTranslation(me.sideslip_x + (beta * me.sideslip_pixels_per_degree),me.sideslip_y + me.sideslip_text_offset);
         me.sideslip_gauge_indicator.setTranslation(me.sideslip_x + (beta * me.sideslip_pixels_per_degree),me.sideslip_y);
-            
+        
+        #me.slider_width = math.clamp(eng_temp, me.engine_temp_min_temp, me.engine_temp_max_temp);
+        #me.slider_width = me.slider_width - me.engine_temp_min_temp;
+        #me.slider_width = me.slider_width / (me.engine_temp_max_temp - me.engine_temp_min_temp) * me.engine_temp_guage_length;
+        me.slider_width = me.find_slider_width(eng_temp,me.engine_temp_min_temp, me.engine_temp_max_temp, me.engine_temp_guage_length);
+        me.engine_temp_slider.reset().rect(me.engine_temp_guage_x, me.engine_temp_guage_y, me.slider_width, me.engine_temp_guage_height);
 
+        me.slider_width = me.find_slider_width(eng_rpm,me.engine_rpm_min, me.engine_rpm_max, me.engine_rpm_guage_length);
+        me.engine_rpm_slider.reset().rect(me.engine_rpm_guage_x, me.engine_rpm_guage_y, me.slider_width, me.engine_rpm_guage_height);
+
+        me.slider_width = me.find_slider_width(eng_flow,me.engine_fuel_min, me.engine_fuel_max, me.engine_fuel_guage_length);
+        me.engine_fuel_slider.reset().rect(me.engine_fuel_guage_x, me.engine_fuel_guage_y, me.slider_width, me.engine_fuel_guage_height);
+
+        me.slider_width = me.find_slider_width(eng_pres,me.engine_manipres_min, me.engine_manipres_max, me.engine_manipres_guage_length);
+        me.engine_manipres_slider.reset().rect(me.engine_manipres_guage_x, me.engine_manipres_guage_y, me.slider_width, me.engine_manipres_guage_height);
+
+    },
+    screen_vsi_ap_up_little: func() {
+        setprop("it-stec55x/input/hdg",math.periodic(0,360,getprop("it-stec55x/input/hdg")+1));
+    },
+    screen_vsi_ap_up_lot: func() {
+        setprop("it-stec55x/input/hdg",math.periodic(0,360,getprop("it-stec55x/input/hdg")+5));
+    },
+    screen_vsi_ap_dn_little: func() {
+        setprop("it-stec55x/input/hdg",math.periodic(0,360,getprop("it-stec55x/input/hdg")-1));
+    },
+    screen_vsi_ap_dn_lot: func() {
+        setprop("it-stec55x/input/hdg",math.periodic(0,360,getprop("it-stec55x/input/hdg")-5));
     },
 
     screen_map_init: func() {
 
+    },
+
+    find_slider_width: func(prop, min, max, length) {
+        me.slider_width = (math.clamp(prop, min, max)) - min;
+        me.slider_width = me.slider_width / (max - min) * length;
+        return me.slider_width;
     },
 
 };
@@ -1370,6 +1640,10 @@ var button_vsi    = {parents:[button_arch], label: "VSI ", main_func: mfd_ref.sc
     var button_sar_gain_inc   = {parents:[button_arch], label:"GN +", main_func: mfd_ref.screen_sar_gain_inc,    temp: 1};
     var button_sar_gain_dec   = {parents:[button_arch], label:"GN -", main_func: mfd_ref.screen_sar_gain_dec,    temp: 1};
     var button_sar_pause      = {parents:[button_arch], label:"PAUS", main_func: mfd_ref.screen_sar_pause_draw,  temp: 1};
+    var button_ap_heading_up  = {parents:[button_arch], label:"HG+ ", main_func: mfd_ref.screen_vsi_ap_up_little,temp: 1};
+    var button_ap_heading_upp = {parents:[button_arch], label:"HG++", main_func: mfd_ref.screen_vsi_ap_up_lot,   temp: 1};
+    var button_ap_heading_dn  = {parents:[button_arch], label:"HG- ", main_func: mfd_ref.screen_vsi_ap_dn_little,temp: 1};
+    var button_ap_heading_dnn = {parents:[button_arch], label:"HG--", main_func: mfd_ref.screen_vsi_ap_dn_lot,   temp: 1};
 
 for (i = 0; i < 20; i = i + 1) {
     append(button_array, button_null);

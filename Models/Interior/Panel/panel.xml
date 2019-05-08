@@ -31,16 +31,6 @@
     </offsets>
   </model>
 
-  <!-- TACH -->
-  <model>
-    <path>Aircraft/C561/Models/Interior/Panel/Instruments/tach/tach.xml</path>
-    <offsets>
-      <x-m> 0.468428 </x-m>
-      <y-m>-0.254989 </y-m>
-      <z-m>-0.008406 </z-m>
-    </offsets>
-  </model>
-
   <!-- VSI -->
   <model>
     <path>Aircraft/C561/Models/Interior/Panel/Instruments/vsi/vsi.xml</path>
@@ -86,7 +76,7 @@
     <path>Aircraft/C561/Models/Interior/Panel/Instruments/man/man.xml</path>
     <offsets>
       <x-m>  0.466166 </x-m>
-      <y-m>  0.196967 </y-m>
+      <y-m>  0.267169 </y-m>
       <z-m> -0.016641 </z-m>
     </offsets>
   </model>
@@ -97,7 +87,7 @@
     <offsets>
       <x-m> 0.465363 </x-m>
       <y-m> 0.197036 </y-m>
-      <z-m> 0.053579 </z-m>
+      <z-m>-0.086753 </z-m>
     </offsets>
   </model>
 
@@ -124,9 +114,9 @@
   <model>
     <path>Aircraft/C561/Models/Interior/Panel/Instruments/KFS-564A/kfs564a.xml</path>
     <offsets>
-      <x-m>  0.459803 </x-m>
-      <y-m> -0.140755 </y-m>
-      <z-m>  0.142421 </z-m>
+      <x-m>  0.460 </x-m>
+      <y-m> -0.257258 </y-m>
+      <z-m>  0.041129 </z-m>
     </offsets>
   </model>
 
@@ -134,7 +124,7 @@
     <path>Aircraft/C561/Models/Interior/Panel/Instruments/ki206/ki206.xml</path>
     <offsets>
       <x-m>  0.465233 </x-m>
-      <y-m> -0.185335 </y-m>
+      <y-m>  0.190575 </y-m>
       <z-m>  0.06754 </z-m>
     </offsets>
   </model>

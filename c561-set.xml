@@ -5,7 +5,7 @@
 
   <sim include="Nasal/views.xml">
 
-    <description>Caudron C 561 (YASim)</description>
+    <description>Caudron C 561</description>
     <author>Emmanuel BARANGER (3D); pinto (other)</author>
 
     <rating>

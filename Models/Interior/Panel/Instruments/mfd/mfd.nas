@@ -837,10 +837,10 @@ var MFD_DISPLAY = {
 
     screen_vsi_init: func() {
         reset_button_array();
-        test_button_array();
         button_array[0] = button_status;
         button_array[1] = button_fuel;
 
+        button_array[15] = button_ap_heading_mth;
         button_array[16] = button_ap_heading_upp;
         button_array[17] = button_ap_heading_up;
         button_array[18] = button_ap_heading_dn;
@@ -1545,6 +1545,9 @@ var MFD_DISPLAY = {
     screen_vsi_ap_dn_lot: func() {
         setprop("it-stec55x/input/hdg",math.periodic(0,360,getprop("it-stec55x/input/hdg")-5));
     },
+    screen_vsi_ap_match: func() {
+        setprop("it-stec55x/input/hdg",math.round(getprop("orientation/heading-magnetic-deg")));
+    },
 
     screen_map_init: func() {
 
@@ -1644,6 +1647,7 @@ var button_vsi    = {parents:[button_arch], label: "VSI ", main_func: mfd_ref.sc
     var button_ap_heading_upp = {parents:[button_arch], label:"HG++", main_func: mfd_ref.screen_vsi_ap_up_lot,   temp: 1};
     var button_ap_heading_dn  = {parents:[button_arch], label:"HG- ", main_func: mfd_ref.screen_vsi_ap_dn_little,temp: 1};
     var button_ap_heading_dnn = {parents:[button_arch], label:"HG--", main_func: mfd_ref.screen_vsi_ap_dn_lot,   temp: 1};
+    var button_ap_heading_mth = {parents:[button_arch], label:"HG C", main_func: mfd_ref.screen_vsi_ap_match,    temp: 1};
 
 for (i = 0; i < 20; i = i + 1) {
     append(button_array, button_null);

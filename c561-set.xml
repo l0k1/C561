@@ -108,6 +108,12 @@
     <keyboard include="Nasal/c561-keyboard.xml"/>
   </input>
 
+  <controls>
+    <gear>
+      <rudder type="bool">1</rudder>
+    </gear>
+  </controls>
+
   <it-stec55x>
     <settings>
       <fd-equipped type="bool">0</fd-equipped> <!-- Does the aircraft have a flight director installed? -->

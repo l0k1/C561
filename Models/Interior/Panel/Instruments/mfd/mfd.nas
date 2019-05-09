@@ -1167,7 +1167,9 @@ var MFD_DISPLAY = {
                                         .setFontSize(30)
                                         .setFont("LiberationFonts/LiberationMono-Regular.ttf")
                                         .setColor(1,1,1);
-
+            ################
+            # small guages
+            ################
             me.engine_rpm_guage_x = 200;
             me.engine_rpm_guage_y = 840;
             me.engine_rpm_guage_length = 100;
@@ -1301,6 +1303,94 @@ var MFD_DISPLAY = {
                                         .setFont("LiberationFonts/LiberationMono-Regular.ttf")
                                         .setColor(1,1,1)
                                         .setTranslation(me.engine_manipres_guage_length + me.engine_manipres_guage_x + me.engine_manipres_guage_text_offset, me.engine_manipres_guage_y);
+        
+            ################
+            # mininav
+            ################
+
+            me.vsi_navguide_size = 60; # size from center out
+            me.ds = 5; # dot size
+            me.vsi_navguide1_x = 275;
+            me.vsi_navguide1_y = 750;
+
+            me.vsi_navguide_dots = me.vsi_navguide_size / 5;
+
+            me.hds = me.ds / 2;
+            me.locbar_vis = 0;
+            me.gsbar_vis = 0;
+
+            me.vsi_nav1guide = me.vsi_group.createChild("path","vsinav1guide")
+                                .move(me.hds,0).line(-me.ds,0) # x2,y0 -> x-2,y0
+                                .move(me.hds + me.vsi_navguide_dots + me.hds,0).line(-me.ds,0) #x-2 + 2 + 5 + 2 = x7,y0 -> x3, y0
+                                .move(me.hds + me.vsi_navguide_dots + me.hds,0).line(-me.ds,0) #x12 -> x8
+                                .move(me.hds + me.vsi_navguide_dots + me.hds,0).line(-me.ds,0) #x17 -> x13
+                                .move(me.hds + me.vsi_navguide_dots + me.hds,0).line(-me.ds,0) #x22 ->
+                                .move(me.hds + me.vsi_navguide_dots + me.hds,0).line(-me.ds,0) #x27 -> x23
+                                .move((me.vsi_navguide_dots * -5) + me.hds,me.vsi_navguide_dots + me.hds).line(0,-me.ds) # x23 + -25 + 2 = x0, y=5 + 2 - 4 = y3
+                                .move(0,me.hds + me.vsi_navguide_dots + me.hds).line(0,-me.ds)
+                                .move(0,me.hds + me.vsi_navguide_dots + me.hds).line(0,-me.ds)
+                                .move(0,me.hds + me.vsi_navguide_dots + me.hds).line(0,-me.ds)
+                                .move(0,me.hds + me.vsi_navguide_dots + me.hds).line(0,-me.ds) #x0, y23
+                                .move(-me.vsi_navguide_dots - me.hds,(me.vsi_navguide_dots * -5) + me.hds).line(me.ds,0) # x-7, y=0
+                                .move(-me.hds - me.vsi_navguide_dots - me.hds,0).line(me.ds,0)
+                                .move(-me.hds - me.vsi_navguide_dots - me.hds,0).line(me.ds,0)
+                                .move(-me.hds - me.vsi_navguide_dots - me.hds,0).line(me.ds,0)
+                                .move(-me.hds - me.vsi_navguide_dots - me.hds,0).line(me.ds,0)
+                                .move((me.vsi_navguide_dots * 5) - me.hds,-me.vsi_navguide_dots - me.hds).line(0,me.ds)
+                                .move(0,-me.hds - me.vsi_navguide_dots - me.hds).line(0,me.ds)
+                                .move(0,-me.hds - me.vsi_navguide_dots - me.hds).line(0,me.ds)
+                                .move(0,-me.hds - me.vsi_navguide_dots - me.hds).line(0,me.ds)
+                                .move(0,-me.hds - me.vsi_navguide_dots - me.hds).line(0,me.ds)
+                                .setColor(1,1,1)
+                                .setStrokeLineWidth(me.ds)
+                                .setTranslation(me.vsi_navguide1_x,me.vsi_navguide1_y);
+
+            me.vsi_nav1locbar = me.vsi_group.createChild("path","vsinav1guide")
+                                .move(0,-me.vsi_navguide_size)
+                                .line(0,me.vsi_navguide_size * 2)
+                                .setColor(1,1,1)
+                                .setStrokeLineWidth(4)
+                                .hide();
+            me.vsi_nav1gsbar = me.vsi_group.createChild("path","vsinav1gsguide")
+                                .move(-me.vsi_navguide_size,0)
+                                .line(me.vsi_navguide_size * 2,0)
+                                .setColor(1,1,1)
+                                .setStrokeLineWidth(4)
+                                .hide();
+
+            me.vsi_nav1label = me.vsi_group.createChild("text","vsinav1label")
+                                .setAlignment("right-top")
+                                .setColor(1,1,1)
+                                .setFontSize(30)
+                                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                .setTranslation(me.vsi_navguide1_x - me.vsi_navguide_size - 5, me.vsi_navguide1_y - me.vsi_navguide_size)
+                                .setText("NAV1");
+            me.vsi_nav1freq = me.vsi_group.createChild("text","vsinav1freq")
+                                .setAlignment("right-top")
+                                .setColor(1,1,1)
+                                .setFontSize(30)
+                                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                .setTranslation(me.vsi_navguide1_x - me.vsi_navguide_size - 5, me.vsi_navguide1_y - me.vsi_navguide_size + 25);
+            me.vsi_nav1id = me.vsi_group.createChild("text","vsinav1rad")
+                                .setAlignment("right-top")
+                                .setColor(1,1,1)
+                                .setFontSize(30)
+                                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                .setTranslation(me.vsi_navguide1_x - me.vsi_navguide_size - 5, me.vsi_navguide1_y - me.vsi_navguide_size + 50);
+            me.vsi_nav1rad = me.vsi_group.createChild("text","vsinav1rad")
+                                .setAlignment("right-top")
+                                .setColor(1,1,1)
+                                .setFontSize(30)
+                                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                .setTranslation(me.vsi_navguide1_x - me.vsi_navguide_size - 5, me.vsi_navguide1_y - me.vsi_navguide_size + 75);
+            me.vsi_nav1tofrom = me.vsi_group.createChild("text","vsinav1rad")
+                                .setAlignment("right-top")
+                                .setColor(1,1,1)
+                                .setFontSize(30)
+                                .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                .setTranslation(me.vsi_navguide1_x - me.vsi_navguide_size - 5, me.vsi_navguide1_y - me.vsi_navguide_size + 100);
+
+
         }
         me.vsi_group.show();
         me.pitchbar_group.show();
@@ -1330,6 +1420,21 @@ var MFD_DISPLAY = {
         var eng_flow = getprop("/engines/engine/fuel-flow-gph");
         var eng_pres = getprop("/engines/engine/mp-inhg");
 
+        # nav stuff
+        var nav1freq = getprop("/instrumentation/nav/frequencies/selected-mhz");
+        var nav1rad = getprop("/instrumentation/nav/radials/selected-deg");
+        var nav1id = "";
+
+        var nav1tofrom = "";
+        if (getprop("/instrumentation/nav/in-range")) {
+            nav1id = getprop("/instrumentation/nav/nav-id");
+        }
+        if ( getprop("/instrumentation/nav/to-flag") == 1 ) {
+            nav1tofrom = "TO"
+        } elsif (getprop("/instrumentation/nav/from-flag") == 1) {
+            nav1tofrom = "FROM"
+        }
+
 
         # update text boxes
         me.vsi_alt_text.setText("ALT: " ~ math.round(altitude,10));
@@ -1342,8 +1447,11 @@ var MFD_DISPLAY = {
         me.engine_manipres_readout.setText(sprintf("%0.2f",eng_pres));
         me.compass_heading_text.setText("HDG: " ~ math.round(heading));
         me.ap_heading_text.setText("AP: " ~ math.round(ap_heading));
-        #me.vsi_vss_text =
-        # speed tape update
+        # nav stuff
+        me.vsi_nav1freq.setText(sprintf("%0.2f",nav1freq));
+        me.vsi_nav1rad.setText(math.round(nav1rad));
+        me.vsi_nav1tofrom.setText(nav1tofrom);
+        me.vsi_nav1id.setText(nav1id);
         #  print('running');
 
         # determine distance to bottom bar
@@ -1517,9 +1625,9 @@ var MFD_DISPLAY = {
         me.sideslip_gauge_readout.setTranslation(me.sideslip_x + (beta * me.sideslip_pixels_per_degree),me.sideslip_y + me.sideslip_text_offset);
         me.sideslip_gauge_indicator.setTranslation(me.sideslip_x + (beta * me.sideslip_pixels_per_degree),me.sideslip_y);
         
-        #me.slider_width = math.clamp(eng_temp, me.engine_temp_min_temp, me.engine_temp_max_temp);
-        #me.slider_width = me.slider_width - me.engine_temp_min_temp;
-        #me.slider_width = me.slider_width / (me.engine_temp_max_temp - me.engine_temp_min_temp) * me.engine_temp_guage_length;
+        ################
+        # minigauge stuff
+        ################
         me.slider_width = me.find_slider_width(eng_temp,me.engine_temp_min_temp, me.engine_temp_max_temp, me.engine_temp_guage_length);
         me.engine_temp_slider.reset().rect(me.engine_temp_guage_x, me.engine_temp_guage_y, me.slider_width, me.engine_temp_guage_height);
 
@@ -1532,6 +1640,31 @@ var MFD_DISPLAY = {
         me.slider_width = me.find_slider_width(eng_pres,me.engine_manipres_min, me.engine_manipres_max, me.engine_manipres_guage_length);
         me.engine_manipres_slider.reset().rect(me.engine_manipres_guage_x, me.engine_manipres_guage_y, me.slider_width, me.engine_manipres_guage_height);
 
+        ################
+        # nav1 stuff
+        ################
+        if (getprop("/instrumentation/nav/in-range") and !me.locbar_vis) {
+            me.locbar_vis = 1;
+            me.vsi_nav1locbar.show();
+        } elsif (!getprop("/instrumentation/nav/in-range") and me.locbar_vis == 1) {
+            me.locbar_vis = 0;
+            me.vsi_nav1locbar.hide();
+        }
+        if (me.locbar_vis) {
+            me.vsi_nav1locbar.setTranslation(me.vsi_navguide1_x + (me.vsi_navguide_size * getprop("/instrumentation/nav/heading-needle-deflection-norm")),me.vsi_navguide1_y);
+        }
+
+        if (getprop("/instrumentation/nav/has-gs") and !me.gsbar_vis) {
+            me.gsbar_vis = 1;
+            me.vsi_nav1gsbar.show();
+        } elsif (!getprop("/instrumentation/nav/has-gs") and me.gsbar_vis) {
+            me.gsbar_vis = 0;
+            me.vsi_nav1gsbar.hide();
+        }
+
+        if (me.gsbar_vis) {
+            me.vsi_nav1gsbar.setTranslation(me.vsi_navguide1_x, me.vsi_navguide1_y - (me.vsi_navguide_size * getprop("/instrumentation/nav/gs-needle-deflection-norm")));
+        }
     },
     screen_vsi_ap_up_little: func() {
         setprop("it-stec55x/input/hdg",math.periodic(0,360,getprop("it-stec55x/input/hdg")+1));

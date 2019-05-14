@@ -165,10 +165,10 @@ var MFD_DISPLAY = {
         # for status screen
         m.status_texts = nil;
 
-        # for the fuel screen
+        # to detect a screen init
         m.fuel_group = nil;
-
         m.vsi_group = nil;
+        m.nav_group = nil;
 
         # for map screen
         m.airports = [];
@@ -256,6 +256,7 @@ var MFD_DISPLAY = {
         button_array[0] = button_sar;
         button_array[1] = button_fuel;
         button_array[2] = button_vsi;
+        button_array[3] = button_nav;
         me.update_labels();
         if (me.status_texts == nil) {
             me.status_texts = me.mfd.createGroup();
@@ -1691,6 +1692,7 @@ var MFD_DISPLAY = {
     # not doing any data input. this will be handled seperately by the radios.
     screen_nav_init: func() {
         reset_button_array();
+        test_button_array();
         button_array[0] = button_status;
         button_array[1] = button_fuel;
         button_array[2] = button_vsi;
@@ -1700,17 +1702,17 @@ var MFD_DISPLAY = {
             me.nav_group = me.mfd.createGroup();
             
             # VOR settings
-            me.vor_size = 250;
+            me.vor_size = 375;
             me.dot_size = 5;
-            me.vor_compass_big_length = 15;
-            me.vor_compass_small_length = 10;
-            me.vor_compass_font_size = 20;
+            me.vor_compass_big_length = 25;
+            me.vor_compass_small_length = 20;
+            me.vor_compass_font_size = 18;
             me.vor_compass_font = "LiberationFonts/LiberationMono-Regular.ttf";
-            me.vor_compass_big_setting = 5; # every X, put a big line and a text box with the compass reading
+            me.vor_compass_big_setting = 15; # every X, put a big line and a text box with the compass reading
             
-            me.nav_vor_1_x = 250;
+            me.nav_vor_1_x = 300;
             me.nav_vor_1_y = 250;
-            me.nav_vor_2_x = 750;
+            me.nav_vor_2_x = 700;
             me.nav_vor_2_y = 250;
             
             # ADF settings
@@ -1721,10 +1723,10 @@ var MFD_DISPLAY = {
             me.adf_compass_font = "LiberationFonts/LiberationMono-Regular.ttf";
             me.adf_compass_big_setting = 5; # every X, put a big line and a text box with the compass reading
             
-            me.nav_adf_1_x = 250;
-            me.nav_adf_1_y = 500;
-            me.nav_adf_2_x = 750;
-            me.nav_adf_2_y = 500;
+            me.nav_adf_1_x = 300;
+            me.nav_adf_1_y = 700;
+            me.nav_adf_2_x = 700;
+            me.nav_adf_2_y = 700;
             
             
             me.vor_size_radius = me.vor_size / 2;
@@ -1741,19 +1743,19 @@ var MFD_DISPLAY = {
             # create compass layouts
             me.x = 0;
             me.y = 0;
-            for (i = 0; i < 360; i = i + 1) {
+            for (var i = 0; i < 360; i = i + 5) {
                 me.x = math.sin(i * D2R);
-                me.y = -math.cos(i * D2R);
+                me.y = math.cos(i * D2R);
                 if (math.mod(i, me.vor_compass_big_setting) == 0) {
                     me.line_length = -me.vor_compass_big_length;
                     append(me.nav_vor_1_txt, [i, me.nav_group.createChild("text","navvor1text" ~ i)
-                                                    .setAlignment("center-bottom")
+                                                    .setAlignment("center-top")
                                                     .setColor(1,1,1)
                                                     .setFontSize(me.vor_compass_font_size)
                                                     .setFont(me.vor_compass_font)
                                                     .setText(i)]);
                     append(me.nav_vor_2_txt, [i, me.nav_group.createChild("text","navvor2text" ~ i)
-                                                    .setAlignment("center-bottom")
+                                                    .setAlignment("center-top")
                                                     .setColor(1,1,1)
                                                     .setFontSize(me.vor_compass_font_size)
                                                     .setFont(me.vor_compass_font)
@@ -1767,13 +1769,13 @@ var MFD_DISPLAY = {
                 if (math.mod(i, me.adf_compass_big_setting) == 0){
                     me.line_length = -me.adf_compass_big_length;
                     append(me.nav_adf_1_txt, [i, me.nav_group.createChild("text","navadf1text" ~ i)
-                                                    .setAlignment("center-bottom")
+                                                    .setAlignment("center-top")
                                                     .setColor(1,1,1)
                                                     .setFontSize(me.adf_compass_font_size)
                                                     .setFont(me.adf_compass_font)
                                                     .setText(i)]);
                     append(me.nav_adf_2_txt, [i, me.nav_group.createChild("text","navadf2text" ~ i)
-                                                    .setAlignment("center-bottom")
+                                                    .setAlignment("center-top")
                                                     .setColor(1,1,1)
                                                     .setFontSize(me.adf_compass_font_size)
                                                     .setFont(me.adf_compass_font)
@@ -1788,45 +1790,110 @@ var MFD_DISPLAY = {
             # create dots in center of VOR
             
             me.hds = me.dot_size / 2;
-                        
-            me.nav_vorguide_dots = ((me.vor_size_radius - me.vor_compass_big_length) * 0.75) / 5; # spacing between dots
 
-            me.nav_vor_1.move(me.hds,0).line(-me.dot_size,0);
-            me.nav_vor_2.move(me.hds,0).line(-me.dot_size,0);
-            for (i = 1; i >= 5; i = i + 1) {
-                me.nav_vor_1.moveTo( me.nav_vorguide_dots * i - me.hds,0).line( me.dot_size,0);
-                me.nav_vor_1.moveTo(-me.nav_vorguide_dots * i + me.hds,0).line(-me.dot_size,0);
-                me.nav_vor_1.moveTo(0, me.nav_vorguide_dots * i - me.hds).line(0, me.dot_size);
-                me.nav_vor_1.moveTo(0,-me.nav_vorguide_dots * i + me.hds).line(0,-me.dot_size);
-                me.nav_vor_2.moveTo( me.nav_vorguide_dots * i - me.hds,0).line( me.dot_size,0);
-                me.nav_vor_2.moveTo(-me.nav_vorguide_dots * i + me.hds,0).line(-me.dot_size,0);
-                me.nav_vor_2.moveTo(0, me.nav_vorguide_dots * i - me.hds).line(0, me.dot_size);
-                me.nav_vor_2.moveTo(0,-me.nav_vorguide_dots * i + me.hds).line(0,-me.dot_size);
+            me.nav_dots_1 = me.nav_group.createChild("path","navdots1");
+            me.nav_dots_2 = me.nav_group.createChild("path","navdots1");
+                        
+            me.nav_vorguide_dots = ((me.vor_size_radius - me.vor_compass_big_length) * 0.6) / 5; # spacing between dots
+            me.nav_dots_1.move(me.hds,0).line(-me.dot_size,0);
+            me.nav_dots_2.move(me.hds,0).line(-me.dot_size,0);
+            for (var i = 1; i <= 5; i = i + 1) {
+                me.nav_dots_1.moveTo( me.nav_vorguide_dots * i - me.hds,0).line( me.dot_size,0);
+                me.nav_dots_1.moveTo(-me.nav_vorguide_dots * i + me.hds,0).line(-me.dot_size,0);
+                me.nav_dots_1.moveTo(0, me.nav_vorguide_dots * i - me.hds).line(0, me.dot_size);
+                me.nav_dots_1.moveTo(0,-me.nav_vorguide_dots * i + me.hds).line(0,-me.dot_size);
+                me.nav_dots_2.moveTo( me.nav_vorguide_dots * i - me.hds,0).line( me.dot_size,0);
+                me.nav_dots_2.moveTo(-me.nav_vorguide_dots * i + me.hds,0).line(-me.dot_size,0);
+                me.nav_dots_2.moveTo(0, me.nav_vorguide_dots * i - me.hds).line(0, me.dot_size);
+                me.nav_dots_2.moveTo(0,-me.nav_vorguide_dots * i + me.hds).line(0,-me.dot_size);
             }
+
+            # miscellany
             
+            me.nav_vor_1_hdg_bar = me.nav_group.createChild("path","navvor1hdgbar")
+                                        .moveTo(0,-me.vor_size_radius * 0.25)
+                                        .lineTo(0, me.vor_size_radius * 0.25)
+                                        .setColor(1,1,1)
+                                        .setStrokeLineWidth(me.dot_size);
+            me.nav_vor_2_hdg_bar = me.nav_group.createChild("path","navvor2hdgbar")
+                                        .moveTo(0,-me.vor_size_radius * 0.25)
+                                        .lineTo(0, me.vor_size_radius * 0.25)
+                                        .setColor(1,1,1)
+                                        .setStrokeLineWidth(me.dot_size);
+            me.nav_vor_1_gs_bar = me.nav_group.createChild("path","navvor1gsbar")
+                                        .moveTo(-me.vor_size_radius * 0.25,0)
+                                        .lineTo( me.vor_size_radius * 0.25,0)
+                                        .setColor(1,1,1)
+                                        .setStrokeLineWidth(me.dot_size);
+            me.nav_vor_2_gs_bar = me.nav_group.createChild("path","navvor2gsbar")
+                                        .moveTo(-me.vor_size_radius * 0.25,0)
+                                        .lineTo( me.vor_size_radius * 0.25,0)
+                                        .setColor(1,1,1)
+                                        .setStrokeLineWidth(me.dot_size);
+
+
+            me.nav_vor_1_hdg_ind = me.nav_group.createChild("path","navvor1hdgind")
+                                        .line(-5,0)
+                                        .line(5,8)
+                                        .line(5,-8)
+                                        .line(-5,0)
+                                        .setColor(1,1,1)
+                                        .setStrokeLineWidth(me.dot_size)
+                                        .setTranslation(me.nav_vor_1_x,me.nav_vor_1_y - me.vor_size_radius);
+            me.nav_vor_1_rad_ind = me.nav_group.createChild("path","navvor1hdgind")
+                                        .line(-5,0)
+                                        .line(5,-8)
+                                        .line(5,8)
+                                        .line(-5,0)
+                                        .setColor(0,1,0)
+                                        .setStrokeLineWidth(me.dot_size);
+
             # final settings
             
+            me.nav_dots_1.setColor(1,1,1);
+            me.nav_dots_1.setStrokeLineWidth(me.dot_size);
+            me.nav_dots_1.setTranslation(me.nav_vor_1_x,me.nav_vor_1_y);
+
+            me.nav_dots_2.setColor(1,1,1);
+            me.nav_dots_2.setStrokeLineWidth(me.dot_size);
+            me.nav_dots_2.setTranslation(me.nav_vor_2_x,me.nav_vor_2_y);
+
             me.nav_vor_1.setColor(1,1,1);
-            me.nav_vor_1.setStrokeLineWidth(me.dot_size);
+            me.nav_vor_1.setStrokeLineWidth(1);
             me.nav_vor_1.setTranslation(me.nav_vor_1_x,me.nav_vor_1_y);
             me.nav_vor_2.setColor(1,1,1);
-            me.nav_vor_2.setStrokeLineWidth(me.dot_size);
+            me.nav_vor_2.setStrokeLineWidth(1);
             me.nav_vor_2.setTranslation(me.nav_vor_2_x,me.nav_vor_2_y);
             
             me.nav_adf_1.setColor(1,1,1);
-            me.nav_adf_1.setStrokeLineWidth(me.dot_size);
+            me.nav_adf_1.setStrokeLineWidth(1);
             me.nav_adf_1.setTranslation(me.nav_adf_1_x,me.nav_adf_1_y);
             me.nav_adf_2.setColor(1,1,1);
-            me.nav_adf_2.setStrokeLineWidth(me.dot_size);
+            me.nav_adf_2.setStrokeLineWidth(1);
             me.nav_adf_2.setTranslation(me.nav_adf_2_x,me.nav_adf_2_y);            
             
         }
+        me.nav_group.show();
     },
     
     screen_nav_rem: func() {
+        me.nav_group.hide();
     },
     
-    screen_nav: func() {  
+    screen_nav: func() {
+        var heading = getprop("/orientation/heading-magnetic-deg");
+
+        me.text_loc = me.vor_size_radius - me.vor_compass_big_length - 1;
+        foreach(var txt; me.nav_vor_1_txt) {
+            me.x = math.sin((txt[0] - heading) * D2R);
+            me.y = -math.cos((txt[0] - heading) * D2R);
+            txt[1].setTranslation(me.x * me.text_loc + me.nav_vor_1_x, me.y * me.text_loc + me.nav_vor_1_y);
+            txt[1].setRotation((txt[0] - heading) * D2R);
+        }
+        me.nav_vor_1.setRotation(heading * -D2R);
+        me.nav_vor_2.setRotation(heading * -D2R);
+        me.nav_adf_1.setRotation(heading * -D2R);
+        me.nav_adf_2.setRotation(heading * -D2R);
     },
 
     screen_map_init: func() {
@@ -1906,11 +1973,12 @@ var button_arch = {
 # button definitions
 var button_null   = {parents:[button_arch]};
 var button_test   = {parents:[button_arch], label: "TEST", main_func: mfd_ref.screen_testfunc};
-var button_xxxx   = {parents:[button_arch], label: "NULL"};
+var button_xxxx   = {parents:[button_arch], label: "XXXX"};
 var button_status = {parents:[button_arch], label: "STAT", main_func: mfd_ref.screen_status, init_func: mfd_ref.screen_status_init, end_func: mfd_ref.screen_status_rem};
 var button_sar    = {parents:[button_arch], label: "TSAR", main_func: mfd_ref.screen_sar,    init_func: mfd_ref.screen_sar_init,    end_func: mfd_ref.screen_sar_rem   };
 var button_fuel   = {parents:[button_arch], label: "FUEL", main_func: mfd_ref.screen_fuel,   init_func: mfd_ref.screen_fuel_init,   end_func: mfd_ref.screen_fuel_rem  };
 var button_vsi    = {parents:[button_arch], label: "VSI ", main_func: mfd_ref.screen_vsi,    init_func: mfd_ref.screen_vsi_init,    end_func: mfd_ref.screen_vsi_rem   };
+var button_nav    = {parents:[button_arch], label: "NAV",  main_func: mfd_ref.screen_nav,    init_func: mfd_ref.screen_nav_init,    end_func: mfd_ref.screen_nav_rem   };
     var button_sar_dist_dec   = {parents:[button_arch], label:"DISV", main_func: mfd_ref.screen_sar_dec_dist,    temp: 1};
     var button_sar_dist_inc   = {parents:[button_arch], label:"DISΛ", main_func: mfd_ref.screen_sar_inc_dist,    temp: 1};
     var button_sar_slew_left  = {parents:[button_arch], label:"SLW<", main_func: mfd_ref.screen_sar_slew_left,   temp: 1};

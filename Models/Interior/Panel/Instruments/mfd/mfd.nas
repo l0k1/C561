@@ -292,7 +292,7 @@ var MFD_DISPLAY = {
     screen_status: func() {
         #print("screen status");
         me.status_texts.getElementById("speed").setText(sprintf("Speed..........%i kts",props.globals.getNode("velocities/airspeed-kt").getValue()));
-        me.status_texts.getElementById("altitude").setText(sprintf("Altitude.......%i ft",props.globals.getNode("position/altitude-ft").getValue()));
+        me.status_texts.getElementById("altitude").setText(sprintf("Altitude.......%i ft",props.globals.getNode("instrumentation/altimeter/indicated-altitude-ft").getValue()));
         me.status_texts.getElementById("heading").setText(sprintf("Heading........%i",props.globals.getNode("orientation/heading-magnetic-deg").getValue()));
     },
 
@@ -847,6 +847,12 @@ var MFD_DISPLAY = {
         button_array[18] = button_ap_heading_dn;
         button_array[19] = button_ap_heading_dnn;
 
+        button_array[10] = button_qnh_down_lot;
+        button_array[11] = button_qnh_down_little;
+        button_array[12] = button_qnh_toggle;
+        button_array[13] = button_qnh_up_little;
+        button_array[14] = button_qnh_up_lot;
+
         me.update_labels();
         # todo:
         # sideslip
@@ -940,6 +946,8 @@ var MFD_DISPLAY = {
                 .lineTo(me.far_edge_dist,me.vert_center)
                 .setStrokeLineWidth(4)
                 .setColor(0.2,1.0,0.2);
+
+            me.qnh_setting = 0;
 
             ################
             # compass tape stuff
@@ -1051,7 +1059,13 @@ var MFD_DISPLAY = {
                                     .setFontSize(28)
                                     .setFont("LiberationFonts/LiberationMono-Regular.ttf")
                                     .setColor(1,1,1)
-                                    .setTranslation(me.edge_dist,me.lower_limit+50);
+                                    .setTranslation(me.edge_dist,me.lower_limit+40);
+            me.vsi_qnh_text = me.vsi_group.createChild("text","spd_disp")
+                                    .setAlignment("left-top")
+                                    .setFontSize(28)
+                                    .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                    .setColor(1,1,1)
+                                    .setTranslation(me.edge_dist,me.lower_limit+65);
             me.vsi_spd_text = me.vsi_group.createChild("text","spd_disp")
                                     .setAlignment("right-top")
                                     .setFontSize(28)
@@ -1063,7 +1077,7 @@ var MFD_DISPLAY = {
                                     .setFontSize(28)
                                     .setFont("LiberationFonts/LiberationMono-Regular.ttf")
                                     .setColor(1,1,1)
-                                    .setTranslation(1024 - me.edge_dist,me.lower_limit+50);
+                                    .setTranslation(1024 - me.edge_dist,me.lower_limit+40);
 
             ################
             # alpha gauge
@@ -1311,7 +1325,7 @@ var MFD_DISPLAY = {
 
             me.vsi_navguide_size = 60; # size from center out
             me.ds = 5; # dot size
-            me.vsi_navguide1_x = 275;
+            me.vsi_navguide1_x = 475;
             me.vsi_navguide1_y = 750;
 
             me.vsi_navguide_dots = me.vsi_navguide_size / 5;
@@ -1409,7 +1423,9 @@ var MFD_DISPLAY = {
         var speed = getprop("velocities/airspeed-kt");
         var v_speed = getprop("velocities/vertical-speed-fps");
         var mach = getprop("velocities/mach");
-        var altitude = getprop("position/altitude-ft");
+        var altitude = getprop("instrumentation/altimeter/indicated-altitude-ft");
+        var inhg = getprop("instrumentation/altimeter/setting-inhg");
+        var hpa = getprop("instrumentation/altimeter/setting-hpa");
         var heading = getprop("orientation/heading-magnetic-deg");
         var ap_heading = getprop("it-stec55x/input/hdg");
         var pitch = getprop("orientation/pitch-deg");
@@ -1436,10 +1452,14 @@ var MFD_DISPLAY = {
             nav1tofrom = "FROM"
         }
 
-
         # update text boxes
         me.vsi_alt_text.setText("ALT: " ~ math.round(altitude,10));
         me.vsi_vss_text.setText("V/S: " ~ math.round(v_speed*60,10));
+        if (!me.qnh_setting) {
+            me.vsi_qnh_text.setText(sprintf("QNH: %0.2f",inhg));
+        } else {
+            me.vsi_qnh_text.setText("QNH: " ~ math.round(hpa));
+        }
         me.vsi_mch_text.setText(sprintf("MACH: %0.2f",mach));
         me.vsi_spd_text.setText("IAS: " ~ math.round(speed));
         me.engine_temp_readout.setText(math.round(eng_temp));
@@ -1682,6 +1702,38 @@ var MFD_DISPLAY = {
     screen_vsi_ap_match: func() {
         setprop("it-stec55x/input/hdg",math.round(getprop("orientation/heading-magnetic-deg")));
     },
+    screen_vsi_qnh_toggle: func() {
+        me.qnh_setting = !me.qnh_setting;
+    },
+    screen_vsi_qnh_up_little: func() {
+        if (!me.qnh_setting) {
+            setprop("instrumentation/altimeter/setting-inhg",getprop("instrumentation/altimeter/setting-inhg")+0.01);
+        } else {
+            setprop("instrumentation/altimeter/setting-hpa",getprop("instrumentation/altimeter/setting-hpa")+1);
+        }
+    },
+    screen_vsi_qnh_down_little: func() {
+        if (!me.qnh_setting) {
+            setprop("instrumentation/altimeter/setting-inhg",getprop("instrumentation/altimeter/setting-inhg")-0.01);
+        } else {
+            setprop("instrumentation/altimeter/setting-hpa",getprop("instrumentation/altimeter/setting-hpa")-1);
+        }
+    },
+    screen_vsi_qnh_up_lot: func() {
+        if (!me.qnh_setting) {
+            setprop("instrumentation/altimeter/setting-inhg",getprop("instrumentation/altimeter/setting-inhg")+0.1);
+        } else {
+            setprop("instrumentation/altimeter/setting-hpa",getprop("instrumentation/altimeter/setting-hpa")+5);
+        }
+    },
+    screen_vsi_qnh_down_lot: func() {
+        if (!me.qnh_setting) {
+            setprop("instrumentation/altimeter/setting-inhg",getprop("instrumentation/altimeter/setting-inhg")-0.1);
+        } else {
+            setprop("instrumentation/altimeter/setting-hpa",getprop("instrumentation/altimeter/setting-hpa")-5);
+        }
+    },
+
     
     # the nav screen will have 3 main rows
     # top row will be two VOR readouts + compasses
@@ -1979,23 +2031,28 @@ var button_sar    = {parents:[button_arch], label: "TSAR", main_func: mfd_ref.sc
 var button_fuel   = {parents:[button_arch], label: "FUEL", main_func: mfd_ref.screen_fuel,   init_func: mfd_ref.screen_fuel_init,   end_func: mfd_ref.screen_fuel_rem  };
 var button_vsi    = {parents:[button_arch], label: "VSI ", main_func: mfd_ref.screen_vsi,    init_func: mfd_ref.screen_vsi_init,    end_func: mfd_ref.screen_vsi_rem   };
 var button_nav    = {parents:[button_arch], label: "NAV",  main_func: mfd_ref.screen_nav,    init_func: mfd_ref.screen_nav_init,    end_func: mfd_ref.screen_nav_rem   };
-    var button_sar_dist_dec   = {parents:[button_arch], label:"DISV", main_func: mfd_ref.screen_sar_dec_dist,    temp: 1};
-    var button_sar_dist_inc   = {parents:[button_arch], label:"DISΛ", main_func: mfd_ref.screen_sar_inc_dist,    temp: 1};
-    var button_sar_slew_left  = {parents:[button_arch], label:"SLW<", main_func: mfd_ref.screen_sar_slew_left,   temp: 1};
-    var button_sar_slew_right = {parents:[button_arch], label:"SLW>", main_func: mfd_ref.screen_sar_slew_right,  temp: 1};
-    var button_sar_slew_up    = {parents:[button_arch], label:"SLWΛ", main_func: mfd_ref.screen_sar_slew_up,     temp: 1};
-    var button_sar_slew_down  = {parents:[button_arch], label:"SLWV", main_func: mfd_ref.screen_sar_slew_down,   temp: 1};
-    var button_sar_slew_ctr   = {parents:[button_arch], label:"SLWC", main_func: mfd_ref.screen_sar_slew_center, temp: 1};
-    var button_sar_zoom_in    = {parents:[button_arch], label:"ZM +", main_func: mfd_ref.screen_sar_zoom_in,     temp: 1};
-    var button_sar_zoom_out   = {parents:[button_arch], label:"ZM -", main_func: mfd_ref.screen_sar_zoom_out,    temp: 1};
-    var button_sar_gain_inc   = {parents:[button_arch], label:"GN +", main_func: mfd_ref.screen_sar_gain_inc,    temp: 1};
-    var button_sar_gain_dec   = {parents:[button_arch], label:"GN -", main_func: mfd_ref.screen_sar_gain_dec,    temp: 1};
-    var button_sar_pause      = {parents:[button_arch], label:"PAUS", main_func: mfd_ref.screen_sar_pause_draw,  temp: 1};
-    var button_ap_heading_up  = {parents:[button_arch], label:"HG+ ", main_func: mfd_ref.screen_vsi_ap_up_little,temp: 1};
-    var button_ap_heading_upp = {parents:[button_arch], label:"HG++", main_func: mfd_ref.screen_vsi_ap_up_lot,   temp: 1};
-    var button_ap_heading_dn  = {parents:[button_arch], label:"HG- ", main_func: mfd_ref.screen_vsi_ap_dn_little,temp: 1};
-    var button_ap_heading_dnn = {parents:[button_arch], label:"HG--", main_func: mfd_ref.screen_vsi_ap_dn_lot,   temp: 1};
-    var button_ap_heading_mth = {parents:[button_arch], label:"HG C", main_func: mfd_ref.screen_vsi_ap_match,    temp: 1};
+    var button_sar_dist_dec   = {parents:[button_arch], label:"DISV", main_func: mfd_ref.screen_sar_dec_dist,        temp: 1};
+    var button_sar_dist_inc   = {parents:[button_arch], label:"DISΛ", main_func: mfd_ref.screen_sar_inc_dist,        temp: 1};
+    var button_sar_slew_left  = {parents:[button_arch], label:"SLW<", main_func: mfd_ref.screen_sar_slew_left,       temp: 1};
+    var button_sar_slew_right = {parents:[button_arch], label:"SLW>", main_func: mfd_ref.screen_sar_slew_right,      temp: 1};
+    var button_sar_slew_up    = {parents:[button_arch], label:"SLWΛ", main_func: mfd_ref.screen_sar_slew_up,         temp: 1};
+    var button_sar_slew_down  = {parents:[button_arch], label:"SLWV", main_func: mfd_ref.screen_sar_slew_down,       temp: 1};
+    var button_sar_slew_ctr   = {parents:[button_arch], label:"SLWC", main_func: mfd_ref.screen_sar_slew_center,     temp: 1};
+    var button_sar_zoom_in    = {parents:[button_arch], label:"ZM +", main_func: mfd_ref.screen_sar_zoom_in,         temp: 1};
+    var button_sar_zoom_out   = {parents:[button_arch], label:"ZM -", main_func: mfd_ref.screen_sar_zoom_out,        temp: 1};
+    var button_sar_gain_inc   = {parents:[button_arch], label:"GN +", main_func: mfd_ref.screen_sar_gain_inc,        temp: 1};
+    var button_sar_gain_dec   = {parents:[button_arch], label:"GN -", main_func: mfd_ref.screen_sar_gain_dec,        temp: 1};
+    var button_sar_pause      = {parents:[button_arch], label:"PAUS", main_func: mfd_ref.screen_sar_pause_draw,      temp: 1};
+    var button_ap_heading_up  = {parents:[button_arch], label:"HG+ ", main_func: mfd_ref.screen_vsi_ap_up_little,    temp: 1};
+    var button_ap_heading_upp = {parents:[button_arch], label:"HG++", main_func: mfd_ref.screen_vsi_ap_up_lot,       temp: 1};
+    var button_ap_heading_dn  = {parents:[button_arch], label:"HG- ", main_func: mfd_ref.screen_vsi_ap_dn_little,    temp: 1};
+    var button_ap_heading_dnn = {parents:[button_arch], label:"HG--", main_func: mfd_ref.screen_vsi_ap_dn_lot,       temp: 1};
+    var button_ap_heading_mth = {parents:[button_arch], label:"HG C", main_func: mfd_ref.screen_vsi_ap_match,        temp: 1};
+    var button_qnh_toggle     = {parents:[button_arch], label:"QNTG", main_func: mfd_ref.screen_vsi_qnh_toggle,      temp: 1};
+    var button_qnh_up_little  = {parents:[button_arch], label:"QN+ ", main_func: mfd_ref.screen_vsi_qnh_up_little,   temp: 1};
+    var button_qnh_down_little= {parents:[button_arch], label:"QN- ", main_func: mfd_ref.screen_vsi_qnh_down_little, temp: 1};
+    var button_qnh_up_lot     = {parents:[button_arch], label:"QN++", main_func: mfd_ref.screen_vsi_qnh_up_lot,      temp: 1};
+    var button_qnh_down_lot   = {parents:[button_arch], label:"QN--", main_func: mfd_ref.screen_vsi_qnh_down_lot,    temp: 1};
 
 for (i = 0; i < 20; i = i + 1) {
     append(button_array, button_null);

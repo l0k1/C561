@@ -14,6 +14,7 @@
     </unload>
   </nasal>
 
+
   <animation>
     <object-name>fuselage</object-name>
     <object-name>air</object-name>
@@ -105,6 +106,10 @@
     <object-name>cache</object-name>
   </effect>
 
+  <effect>
+    <inherits-from>Aircraft/C561/Models/Effects/normal/normal</inherits-from>
+    <object-name>fuselage</object-name>
+  </effect>
   <animation>
     <type>shader</type>
     <shader>chrome</shader>

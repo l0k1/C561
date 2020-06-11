@@ -107,9 +107,29 @@
   </effect>
 
   <effect>
-    <inherits-from>Aircraft/C561/Models/Effects/normal/normal</inherits-from>
+    <inherits-from>Aircraft/C561/Models/Effects/fuselage/c561-fuselage</inherits-from>
     <object-name>fuselage</object-name>
+    <object-name>air</object-name>
+    <object-name>ailes</object-name>
+    <object-name>derive</object-name>
+    <object-name>bol</object-name>
+    <object-name>aileronG</object-name>
+    <object-name>aileronD</object-name>
+    <object-name>voletG</object-name>
+    <object-name>voletD</object-name>
+    <object-name>profondeur</object-name>
+    <object-name>direction</object-name>
+    <object-name>porteG1</object-name>
+    <object-name>porteG2</object-name>
+    <object-name>porteD1</object-name>
+    <object-name>porteD2</object-name>
+    <object-name>pito</object-name>
+    <object-name>radH</object-name>
+    <object-name>radB</object-name>
+    <object-name>echappes</object-name>
+    <object-name>cache</object-name>
   </effect>
+
   <animation>
     <type>shader</type>
     <shader>chrome</shader>

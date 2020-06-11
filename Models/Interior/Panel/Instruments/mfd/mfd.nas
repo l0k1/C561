@@ -1185,6 +1185,73 @@ var MFD_DISPLAY = {
             ################
             # small guages
             ################
+
+            me.afr_guage_x = 200;
+            me.afr_guage_y = 780;
+            me.afr_guage_length = 100;
+            me.afr_guage_height = 20;
+            me.afr_guage_text_offset = 10;
+            me.afr_min = 9;
+            me.afr_max = 25;
+
+            me.afr_gauge = me.vsi_group.createChild("path","afr_gauge")
+                                        .line(0,me.afr_guage_height)
+                                        .line(me.afr_guage_length,0)
+                                        .line(0,-me.afr_guage_height)
+                                        .line(-me.afr_guage_length,0)
+                                        .setStrokeLineWidth(4)
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.afr_guage_x,me.afr_guage_y);
+            me.afr_slider = me.vsi_group.createChild("path","afr_slider")
+                                        .setColor(0.1,1.0,0.1)
+                                        .setColorFill(0.1,1.0,0.1);
+            me.afr_label =  me.vsi_group.createChild("text","afr_gauge_label")
+                                        .setAlignment("right-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.afr_guage_x - me.afr_guage_text_offset, me.afr_guage_y)
+                                        .setText("AFR");
+            me.afr_readout =  me.vsi_group.createChild("text","afr_readout_label")
+                                        .setAlignment("left-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.afr_guage_length + me.afr_guage_x + me.afr_guage_text_offset, me.afr_guage_y);
+
+            me.prop_pitch_guage_x = 200;
+            me.prop_pitch_guage_y = 810;
+            me.prop_pitch_guage_length = 100;
+            me.prop_pitch_guage_height = 20;
+            me.prop_pitch_guage_text_offset = 10;
+            me.prop_pitch_min = 0;
+            me.prop_pitch_max = 1;
+
+            me.prop_pitch_gauge = me.vsi_group.createChild("path","prop_pitch_gauge")
+                                        .line(0,me.prop_pitch_guage_height)
+                                        .line(me.prop_pitch_guage_length,0)
+                                        .line(0,-me.prop_pitch_guage_height)
+                                        .line(-me.prop_pitch_guage_length,0)
+                                        .setStrokeLineWidth(4)
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.prop_pitch_guage_x,me.prop_pitch_guage_y);
+            me.prop_pitch_slider = me.vsi_group.createChild("path","prop_pitch_slider")
+                                        .setColor(0.1,1.0,0.1)
+                                        .setColorFill(0.1,1.0,0.1);
+            me.prop_pitch_label =  me.vsi_group.createChild("text","prop_pitch_gauge_label")
+                                        .setAlignment("right-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.prop_pitch_guage_x - me.prop_pitch_guage_text_offset, me.prop_pitch_guage_y)
+                                        .setText("PROP");
+            me.prop_pitch_readout =  me.vsi_group.createChild("text","prop_pitch_readout_label")
+                                        .setAlignment("left-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.prop_pitch_guage_length + me.prop_pitch_guage_x + me.prop_pitch_guage_text_offset, me.prop_pitch_guage_y);
+
             me.engine_rpm_guage_x = 200;
             me.engine_rpm_guage_y = 840;
             me.engine_rpm_guage_length = 100;
@@ -1325,7 +1392,7 @@ var MFD_DISPLAY = {
 
             me.vsi_navguide_size = 60; # size from center out
             me.ds = 5; # dot size
-            me.vsi_navguide1_x = 475;
+            me.vsi_navguide1_x = 560;
             me.vsi_navguide1_y = 750;
 
             me.vsi_navguide_dots = me.vsi_navguide_size / 5;
@@ -1436,6 +1503,9 @@ var MFD_DISPLAY = {
         var eng_rpm = getprop("/engines/engine/rpm");
         var eng_flow = getprop("/engines/engine/fuel-flow-gph");
         var eng_pres = getprop("/engines/engine/mp-inhg");
+        var prop_pitch_set = getprop("/controls/engines/engine/propeller-pitch");
+        var prop_pitch_act = getprop("/fdm/jsbsim/propulsion/engine/blade-angle");
+        var afr = getprop("/fdm/jsbsim/propulsion/engine/AFR");
 
         # nav stuff
         var nav1freq = getprop("/instrumentation/nav/frequencies/selected-mhz");
@@ -1462,6 +1532,8 @@ var MFD_DISPLAY = {
         }
         me.vsi_mch_text.setText(sprintf("MACH: %0.2f",mach));
         me.vsi_spd_text.setText("IAS: " ~ math.round(speed));
+        me.afr_readout.setText(sprintf("%0.2f",afr));
+        me.prop_pitch_readout.setText(sprintf("%0.2f",prop_pitch_act));
         me.engine_temp_readout.setText(math.round(eng_temp));
         me.engine_rpm_readout.setText(math.round(eng_rpm));
         me.engine_fuel_readout.setText(sprintf("%0.2f",eng_flow));
@@ -1660,6 +1732,12 @@ var MFD_DISPLAY = {
 
         me.slider_width = me.find_slider_width(eng_pres,me.engine_manipres_min, me.engine_manipres_max, me.engine_manipres_guage_length);
         me.engine_manipres_slider.reset().rect(me.engine_manipres_guage_x, me.engine_manipres_guage_y, me.slider_width, me.engine_manipres_guage_height);
+
+        me.slider_width = me.find_slider_width(prop_pitch_set,me.prop_pitch_min, me.prop_pitch_max, me.prop_pitch_guage_length);
+        me.prop_pitch_slider.reset().rect(me.prop_pitch_guage_x, me.prop_pitch_guage_y, me.slider_width, me.prop_pitch_guage_height);
+
+        me.slider_width = me.find_slider_width(afr,me.afr_min, me.afr_max, me.afr_guage_length);
+        me.afr_slider.reset().rect(me.afr_guage_x, me.afr_guage_y, me.slider_width, me.afr_guage_height);
 
         ################
         # nav1 stuff

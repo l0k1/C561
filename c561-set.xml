@@ -93,6 +93,12 @@
   <engines>
     <engine>
       <rpm type="double">700</rpm>
+      <automix>
+        <max type="bool">true</max>
+        <auto type="bool">false</auto>
+        <lasttemp type="double">0</lasttemp>
+        <lastmix type="double">0</lastmix>
+      </automix>
     </engine>
   </engines>
 

@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+
+<!-- aeromatic v 0.96 http://jsbsim.sourceforge.net/aeromatic2.html generated 2 June 2017 by pinto -->
+<!-- GPLv2+ -->
+
+<system name="automix">
+
+    <channel name="automix-max" execrate="60">
+
+        <fcs_function name="trash/controls/engine/mixture-max">
+            <function>
+                <ifthen>
+                    <property>/engines/engine/automix/max</property>
+                    <value>1</value>
+                    <property>/controls/engines/engine/mixture</property>
+                </ifthen>
+            </function>
+            <output>/controls/engines/engine/mixture</output>
+        </fcs_function>
+
+    </channel>
+
+    <channel name="automix-auto" execrate="4">
+
+        <!-- if increasing mix and temp is dropping, dec mix
+             if increasing mix and temp is rising, inc mix
+             if decreasing mix and temp is rising, dec mix
+             if decreasing mix and temp is dropping, inc mix
+        -->
+
+        <switch name="trash/engines/engine/automix/mixdir">
+            <!-- we never want a stable mix where it doesnt change -->
+            <!-- 0 is dec, 1 is inc -->
+            <!-- use >= so if mix is at 1, then we get movement down -->
+            <default value="0"/>
+            <test logic="AND" value="1">
+                /controls/engines/engine/mixture ge /engines/engine/automix/lastmix
+            </test>
+            <output>/engines/engine/automix/mixdir</output>
+        </switch>
+
+        <switch name="trash/engines/engine/automix/tempdir">
+            <!-- we never want a stable temp where it doesnt change -->
+            <!-- 0 is dec, 1 is inc -->
+            <default value="0"/>
+            <test logic="AND" value="1">
+                /engines/engine/egt-degf gt /engines/engine/automix/lasttemp
+            </test>
+            <output>/engines/engine/automix/tempdir</output>
+        </switch>
+
+        <!-- store the values for the next go around -->
+        <summer name="trash/engines/engine/automix/lasttemp">
+            <input>/engines/engine/egt-degf</input>
+            <output>/engines/engine/automix/lasttemp</output>
+        </summer>
+
+        <summer name="trash/engines/engine/automix/lastmix">
+            <input>/controls/engines/engine/mixture</input>
+            <output>/engines/engine/automix/lastmix</output>
+        </summer>
+
+        <fcs_function name="trash/controls/engine/mix-add">
+            <function>
+                <ifthen>
+                    <and>
+                        <or>
+                            <and>
+                                <!-- temp is rising and mix is rising -->
+                                <property>/engines/engine/automix/mixdir</property>
+                                <property>/engines/engine/automix/tempdir</property>
+                            </and>
+                            <and>
+                                <not><property>/engines/engine/automix/mixdir</property></not>
+                                <not><property>/engines/engine/automix/tempdir</property></not>
+                            </and>
+                        </or>
+                        <lt>
+                            <property>/controls/engines/engine/mixture</property>
+                            <value>1.0</value>
+                        </lt>
+                        <property>/engines/engine/automix/auto</property>
+                    </and>
+                    <sum>
+                        <property>/controls/engines/engine/mixture</property>
+                        <value>0.001</value>
+                    </sum>
+                    <property>/controls/engines/engine/mixture</property>
+                </ifthen>
+            </function>
+            <clipto>
+                <min>0.0</min>
+                <max>1.0</max>
+            </clipto>
+            <output>/controls/engines/engine/mixture</output>
+        </fcs_function>
+
+        <fcs_function name="trash/controls/engine/mix-sub">
+            <function>
+                <ifthen>
+                    <and>
+                        <or>
+                            <and>
+                                <!-- increasing mix and temp is dropping -->
+                                <property>/engines/engine/automix/mixdir</property>
+                                <not><property>/engines/engine/automix/tempdir</property></not>
+                            </and>
+                            <and>
+                                <!-- decreasing mix and temp is rising -->
+                                <not><property>/engines/engine/automix/mixdir</property></not>
+                                <property>/engines/engine/automix/tempdir</property>
+                            </and>
+                        </or>
+                        <property>/engines/engine/automix/auto</property>
+                    </and>
+                    <difference>
+                        <property>/controls/engines/engine/mixture</property>
+                        <value>0.001</value>
+                    </difference>
+                    <property>/controls/engines/engine/mixture</property>
+                </ifthen>
+            </function>
+            <clipto>
+                <min>0.0</min>
+                <max>1.0</max>
+            </clipto>
+            <output>/controls/engines/engine/mixture</output>
+        </fcs_function>
+
+    </channel>
+
+
+</system>
+

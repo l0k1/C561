@@ -790,5 +790,6 @@
  <system file="gear"/> 
  <system file="fuel"/> 
  <system file="brakes"/>
+ <system file="automix"/>
 
 </fdm_config>

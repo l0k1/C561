@@ -169,6 +169,7 @@ var MFD_DISPLAY = {
         m.fuel_group = nil;
         m.vsi_group = nil;
         m.nav_group = nil;
+        m.eng_group = nil;
 
         # for map screen
         m.airports = [];
@@ -257,6 +258,7 @@ var MFD_DISPLAY = {
         button_array[1] = button_fuel;
         button_array[2] = button_vsi;
         button_array[3] = button_nav;
+        button_array[4] = button_eng;
         me.update_labels();
         if (me.status_texts == nil) {
             me.status_texts = me.mfd.createGroup();
@@ -303,6 +305,7 @@ var MFD_DISPLAY = {
         reset_button_array();
         button_array[0] = button_status;
         button_array[1] = button_sar_pause;
+        button_array[4] = button_eng;
         button_array[17] = button_sar_dist_dec;
         button_array[18] = button_sar_dist_inc;
         button_array[16] = button_sar_zoom_out;
@@ -619,6 +622,8 @@ var MFD_DISPLAY = {
         reset_button_array();
         button_array[0] = button_status;
         button_array[2] = button_vsi;
+        button_array[3] = button_nav;
+        button_array[4] = button_eng;
         me.update_labels();
         # we need a simple diagram for the plane
         # we need lines connecting the tanks to an "Engine"
@@ -840,6 +845,8 @@ var MFD_DISPLAY = {
         reset_button_array();
         button_array[0] = button_status;
         button_array[1] = button_fuel;
+        button_array[3] = button_nav;
+        button_array[4] = button_eng;
 
         button_array[15] = button_ap_heading_mth;
         button_array[16] = button_ap_heading_upp;
@@ -2026,6 +2033,299 @@ var MFD_DISPLAY = {
         me.nav_adf_2.setRotation(heading * -D2R);
     },
 
+    screen_eng_init: func() {
+        reset_button_array();
+        test_button_array();
+        button_array[0] = button_status;
+        button_array[1] = button_fuel;
+        button_array[2] = button_vsi;
+        button_array[3] = button_nav;
+        button_array[7] = button_eng_maxmix;
+        button_array[8] = button_eng_automix;
+        button_array[9] = button_eng_killmix;
+        me.update_labels();
+        
+        if (me.eng_group == nil) {
+            me.eng_group = me.mfd.createGroup();            ################
+            # small guages
+            ################
+
+            me.afr_guage_x = 200;
+            me.afr_guage_y = 780;
+            me.afr_guage_length = 100;
+            me.afr_guage_height = 20;
+            me.afr_guage_text_offset = 10;
+            me.afr_min = 9;
+            me.afr_max = 25;
+
+            me.eng_afr_gauge = me.eng_group.createChild("path","afr_gauge")
+                                        .line(0,me.afr_guage_height)
+                                        .line(me.afr_guage_length,0)
+                                        .line(0,-me.afr_guage_height)
+                                        .line(-me.afr_guage_length,0)
+                                        .setStrokeLineWidth(4)
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.afr_guage_x,me.afr_guage_y);
+            me.eng_afr_slider = me.eng_group.createChild("path","afr_slider")
+                                        .setColor(0.1,1.0,0.1)
+                                        .setColorFill(0.1,1.0,0.1);
+            me.eng_afr_label =  me.eng_group.createChild("text","afr_gauge_label")
+                                        .setAlignment("right-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.afr_guage_x - me.afr_guage_text_offset, me.afr_guage_y)
+                                        .setText("AFR");
+            me.eng_afr_readout =  me.eng_group.createChild("text","afr_readout_label")
+                                        .setAlignment("left-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.afr_guage_length + me.afr_guage_x + me.afr_guage_text_offset, me.afr_guage_y);
+
+            me.prop_pitch_guage_x = 200;
+            me.prop_pitch_guage_y = 810;
+            me.prop_pitch_guage_length = 100;
+            me.prop_pitch_guage_height = 20;
+            me.prop_pitch_guage_text_offset = 10;
+            me.prop_pitch_min = 0;
+            me.prop_pitch_max = 1;
+
+            me.eng_prop_pitch_gauge = me.eng_group.createChild("path","prop_pitch_gauge")
+                                        .line(0,me.prop_pitch_guage_height)
+                                        .line(me.prop_pitch_guage_length,0)
+                                        .line(0,-me.prop_pitch_guage_height)
+                                        .line(-me.prop_pitch_guage_length,0)
+                                        .setStrokeLineWidth(4)
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.prop_pitch_guage_x,me.prop_pitch_guage_y);
+            me.eng_prop_pitch_slider = me.eng_group.createChild("path","prop_pitch_slider")
+                                        .setColor(0.1,1.0,0.1)
+                                        .setColorFill(0.1,1.0,0.1);
+            me.eng_prop_pitch_label =  me.eng_group.createChild("text","prop_pitch_gauge_label")
+                                        .setAlignment("right-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.prop_pitch_guage_x - me.prop_pitch_guage_text_offset, me.prop_pitch_guage_y)
+                                        .setText("PROP");
+            me.eng_prop_pitch_readout =  me.eng_group.createChild("text","prop_pitch_readout_label")
+                                        .setAlignment("left-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.prop_pitch_guage_length + me.prop_pitch_guage_x + me.prop_pitch_guage_text_offset, me.prop_pitch_guage_y);
+
+            me.engine_rpm_guage_x = 200;
+            me.engine_rpm_guage_y = 840;
+            me.engine_rpm_guage_length = 100;
+            me.engine_rpm_guage_height = 20;
+            me.engine_rpm_guage_text_offset = 10;
+            me.engine_rpm_min = 0;
+            me.engine_rpm_max = 4000;
+
+            me.eng_engine_rpm_gauge = me.eng_group.createChild("path","engine_rpm_gauge")
+                                        .line(0,me.engine_rpm_guage_height)
+                                        .line(me.engine_rpm_guage_length,0)
+                                        .line(0,-me.engine_rpm_guage_height)
+                                        .line(-me.engine_rpm_guage_length,0)
+                                        .setStrokeLineWidth(4)
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_rpm_guage_x,me.engine_rpm_guage_y);
+            me.eng_engine_rpm_slider = me.eng_group.createChild("path","engine_rpm_slider")
+                                        .setColor(0.1,1.0,0.1)
+                                        .setColorFill(0.1,1.0,0.1);
+            me.eng_engine_rpm_label =  me.eng_group.createChild("text","engine_rpm_gauge_label")
+                                        .setAlignment("right-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_rpm_guage_x - me.engine_rpm_guage_text_offset, me.engine_rpm_guage_y)
+                                        .setText("RPM");
+            me.eng_engine_rpm_readout =  me.eng_group.createChild("text","engine_rpm_readout_label")
+                                        .setAlignment("left-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_rpm_guage_length + me.engine_rpm_guage_x + me.engine_rpm_guage_text_offset, me.engine_rpm_guage_y);
+
+            me.engine_temp_guage_x = 200;
+            me.engine_temp_guage_y = 870;
+            me.engine_temp_guage_length = 100;
+            me.engine_temp_guage_height = 20;
+            me.engine_temp_guage_text_offset = 10;
+            me.engine_temp_min_temp = 1200;
+            me.engine_temp_max_temp = 1800;
+
+            me.eng_engine_temp_gauge = me.eng_group.createChild("path","engine_temp_gauge")
+                                        .line(0,me.engine_temp_guage_height)
+                                        .line(me.engine_temp_guage_length,0)
+                                        .line(0,-me.engine_temp_guage_height)
+                                        .line(-me.engine_temp_guage_length,0)
+                                        .setStrokeLineWidth(4)
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_temp_guage_x,me.engine_temp_guage_y);
+            me.eng_engine_temp_slider = me.eng_group.createChild("path","engine_temp_slider")
+                                        .setColor(0.1,1.0,0.1)
+                                        .setColorFill(0.1,1.0,0.1);
+            me.eng_engine_temp_label =  me.eng_group.createChild("text","engine_temp_gauge_label")
+                                        .setAlignment("right-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_temp_guage_x - me.engine_temp_guage_text_offset, me.engine_temp_guage_y)
+                                        .setText("EGT-F");
+            me.eng_engine_temp_readout =  me.eng_group.createChild("text","engine_temp_readout_label")
+                                        .setAlignment("left-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_temp_guage_length + me.engine_temp_guage_x + me.engine_temp_guage_text_offset, me.engine_temp_guage_y);
+
+
+            me.engine_fuel_guage_x = 200;
+            me.engine_fuel_guage_y = 900;
+            me.engine_fuel_guage_length = 100;
+            me.engine_fuel_guage_height = 20;
+            me.engine_fuel_guage_text_offset = 10;
+            me.engine_fuel_min = 0;
+            me.engine_fuel_max = 35;
+
+            me.eng_engine_fuel_gauge = me.eng_group.createChild("path","engine_fuel_gauge")
+                                        .line(0,me.engine_fuel_guage_height)
+                                        .line(me.engine_fuel_guage_length,0)
+                                        .line(0,-me.engine_fuel_guage_height)
+                                        .line(-me.engine_fuel_guage_length,0)
+                                        .setStrokeLineWidth(4)
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_fuel_guage_x,me.engine_fuel_guage_y);
+            me.eng_engine_fuel_slider = me.eng_group.createChild("path","engine_fuel_slider")
+                                        .setColor(0.1,1.0,0.1)
+                                        .setColorFill(0.1,1.0,0.1);
+            me.eng_engine_fuel_label =  me.eng_group.createChild("text","engine_fuel_gauge_label")
+                                        .setAlignment("right-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_fuel_guage_x - me.engine_fuel_guage_text_offset, me.engine_fuel_guage_y)
+                                        .setText("FLOW");
+            me.eng_engine_fuel_readout =  me.eng_group.createChild("text","engine_fuel_readout_label")
+                                        .setAlignment("left-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_fuel_guage_length + me.engine_fuel_guage_x + me.engine_fuel_guage_text_offset, me.engine_fuel_guage_y);
+
+
+            me.engine_manipres_guage_x = 200;
+            me.engine_manipres_guage_y = 930;
+            me.engine_manipres_guage_length = 100;
+            me.engine_manipres_guage_height = 20;
+            me.engine_manipres_guage_text_offset = 10;
+            me.engine_manipres_min = 0;
+            me.engine_manipres_max = 30;
+
+            me.eng_engine_manipres_gauge = me.eng_group.createChild("path","engine_manipres_gauge")
+                                        .line(0,me.engine_manipres_guage_height)
+                                        .line(me.engine_manipres_guage_length,0)
+                                        .line(0,-me.engine_manipres_guage_height)
+                                        .line(-me.engine_manipres_guage_length,0)
+                                        .setStrokeLineWidth(4)
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_manipres_guage_x,me.engine_manipres_guage_y);
+            me.eng_engine_manipres_slider = me.eng_group.createChild("path","engine_manipres_slider")
+                                        .setColor(0.1,1.0,0.1)
+                                        .setColorFill(0.1,1.0,0.1);
+            me.eng_engine_manipres_label =  me.eng_group.createChild("text","engine_manipres_gauge_label")
+                                        .setAlignment("right-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_manipres_guage_x - me.engine_manipres_guage_text_offset, me.engine_manipres_guage_y)
+                                        .setText("PRES");
+            me.eng_engine_manipres_readout =  me.eng_group.createChild("text","engine_manipres_readout_label")
+                                        .setAlignment("left-top")
+                                        .setFontSize(30)
+                                        .setFont("LiberationFonts/LiberationMono-Regular.ttf")
+                                        .setColor(1,1,1)
+                                        .setTranslation(me.engine_manipres_guage_length + me.engine_manipres_guage_x + me.engine_manipres_guage_text_offset, me.engine_manipres_guage_y);
+        
+        }
+        me.eng_group.show();
+
+    },
+
+    screen_eng: func() {
+        var eng_temp = getprop("/engines/engine/egt-degf");
+        var eng_rpm = getprop("/engines/engine/rpm");
+        var eng_flow = getprop("/engines/engine/fuel-flow-gph");
+        var eng_pres = getprop("/engines/engine/mp-inhg");
+        var prop_pitch_set = getprop("/controls/engines/engine/propeller-pitch");
+        var prop_pitch_act = getprop("/fdm/jsbsim/propulsion/engine/blade-angle");
+        var afr = getprop("/fdm/jsbsim/propulsion/engine/AFR");
+
+        # nav stuff
+        var nav1freq = getprop("/instrumentation/nav/frequencies/selected-mhz");
+        var nav1rad = getprop("/instrumentation/nav/radials/selected-deg");
+        var nav1id = "";
+
+        var nav1tofrom = "";
+        if (getprop("/instrumentation/nav/in-range")) {
+            nav1id = getprop("/instrumentation/nav/nav-id");
+        }
+        if ( getprop("/instrumentation/nav/to-flag") == 1 ) {
+            nav1tofrom = "TO"
+        } elsif (getprop("/instrumentation/nav/from-flag") == 1) {
+            nav1tofrom = "FROM"
+        }
+
+        # update text boxes
+        me.eng_afr_readout.setText(sprintf("%0.2f",afr));
+        me.eng_prop_pitch_readout.setText(sprintf("%0.2f",prop_pitch_act));
+        me.eng_engine_temp_readout.setText(math.round(eng_temp));
+        me.eng_engine_rpm_readout.setText(math.round(eng_rpm));
+        me.eng_engine_fuel_readout.setText(sprintf("%0.2f",eng_flow));
+        me.eng_engine_manipres_readout.setText(sprintf("%0.2f",eng_pres));
+
+        me.slider_width = me.find_slider_width(eng_temp,me.engine_temp_min_temp, me.engine_temp_max_temp, me.engine_temp_guage_length);
+        me.eng_engine_temp_slider.reset().rect(me.engine_temp_guage_x, me.engine_temp_guage_y, me.slider_width, me.engine_temp_guage_height);
+
+        me.slider_width = me.find_slider_width(eng_rpm,me.engine_rpm_min, me.engine_rpm_max, me.engine_rpm_guage_length);
+        me.eng_engine_rpm_slider.reset().rect(me.engine_rpm_guage_x, me.engine_rpm_guage_y, me.slider_width, me.engine_rpm_guage_height);
+
+        me.slider_width = me.find_slider_width(eng_flow,me.engine_fuel_min, me.engine_fuel_max, me.engine_fuel_guage_length);
+        me.eng_engine_fuel_slider.reset().rect(me.engine_fuel_guage_x, me.engine_fuel_guage_y, me.slider_width, me.engine_fuel_guage_height);
+
+        me.slider_width = me.find_slider_width(eng_pres,me.engine_manipres_min, me.engine_manipres_max, me.engine_manipres_guage_length);
+        me.eng_engine_manipres_slider.reset().rect(me.engine_manipres_guage_x, me.engine_manipres_guage_y, me.slider_width, me.engine_manipres_guage_height);
+
+        me.slider_width = me.find_slider_width(prop_pitch_set,me.prop_pitch_min, me.prop_pitch_max, me.prop_pitch_guage_length);
+        me.eng_prop_pitch_slider.reset().rect(me.prop_pitch_guage_x, me.prop_pitch_guage_y, me.slider_width, me.prop_pitch_guage_height);
+
+        me.slider_width = me.find_slider_width(afr,me.afr_min, me.afr_max, me.afr_guage_length);
+        me.eng_afr_slider.reset().rect(me.afr_guage_x, me.afr_guage_y, me.slider_width, me.afr_guage_height);
+
+    },
+
+    screen_eng_rem: func() {
+        me.eng_group.hide();
+
+    },
+
+    screen_eng_max_mix: func() {
+        setprop("/engines/engine/automix/max",1);
+        setprop("/engines/engine/automix/auto",0);
+    },
+
+    screen_eng_auto_mix: func() {
+        setprop("/engines/engine/automix/max",0);
+        setprop("/engines/engine/automix/auto",1);
+
+    },
+    screen_eng_kill: func() {
+
+    },
+
     screen_map_init: func() {
 
     },
@@ -2109,6 +2409,7 @@ var button_sar    = {parents:[button_arch], label: "TSAR", main_func: mfd_ref.sc
 var button_fuel   = {parents:[button_arch], label: "FUEL", main_func: mfd_ref.screen_fuel,   init_func: mfd_ref.screen_fuel_init,   end_func: mfd_ref.screen_fuel_rem  };
 var button_vsi    = {parents:[button_arch], label: "VSI ", main_func: mfd_ref.screen_vsi,    init_func: mfd_ref.screen_vsi_init,    end_func: mfd_ref.screen_vsi_rem   };
 var button_nav    = {parents:[button_arch], label: "NAV",  main_func: mfd_ref.screen_nav,    init_func: mfd_ref.screen_nav_init,    end_func: mfd_ref.screen_nav_rem   };
+var button_eng    = {parents:[button_arch], label: "ENG",  main_func: mfd_ref.screen_eng,    init_func: mfd_ref.screen_eng_init,    end_func: mfd_ref.screen_eng_rem   };
     var button_sar_dist_dec   = {parents:[button_arch], label:"DISV", main_func: mfd_ref.screen_sar_dec_dist,        temp: 1};
     var button_sar_dist_inc   = {parents:[button_arch], label:"DISΛ", main_func: mfd_ref.screen_sar_inc_dist,        temp: 1};
     var button_sar_slew_left  = {parents:[button_arch], label:"SLW<", main_func: mfd_ref.screen_sar_slew_left,       temp: 1};
@@ -2131,6 +2432,9 @@ var button_nav    = {parents:[button_arch], label: "NAV",  main_func: mfd_ref.sc
     var button_qnh_down_little= {parents:[button_arch], label:"QN- ", main_func: mfd_ref.screen_vsi_qnh_down_little, temp: 1};
     var button_qnh_up_lot     = {parents:[button_arch], label:"QN++", main_func: mfd_ref.screen_vsi_qnh_up_lot,      temp: 1};
     var button_qnh_down_lot   = {parents:[button_arch], label:"QN--", main_func: mfd_ref.screen_vsi_qnh_down_lot,    temp: 1};
+    var button_eng_maxmix     = {parents:[button_arch], label:"MMIX", main_func: mfd_ref.screen_eng_max_mix,         temp: 1};
+    var button_eng_automix    = {parents:[button_arch], label:"AMIX", main_func: mfd_ref.screen_eng_auto_mix,        temp: 1};
+    var button_eng_killmix    = {parents:[button_arch], label:"KILL", main_func: mfd_ref.screen_eng_kill,            temp: 1};
 
 for (i = 0; i < 20; i = i + 1) {
     append(button_array, button_null);
